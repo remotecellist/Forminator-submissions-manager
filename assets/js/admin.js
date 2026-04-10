@@ -326,7 +326,7 @@
             updateBulkPanel();
         });
 
-        $([$headCheck[0], $checkAll[0]]).on('change', function () {
+        $('#wsm-head-check, #wsm-check-all').on('change', function () {
             const checked = this.checked;
             $('.wsm-row-check').each(function () {
                 this.checked = checked;

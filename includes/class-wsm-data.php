@@ -232,25 +232,28 @@ class WSM_Data
         if (empty($clean))
             return '';
 
-        // 2. Fix missing leading zero (e.g. 7700900123 -> 447700900123)
+        // 2. Handle international prefix 00 (strip it)
+        if (strpos($clean, '00') === 0) {
+            $clean = substr($clean, 2);
+        }
+
+        // 3. Fix missing leading zero (e.g. 7700900123 -> 447700900123)
         // If it matches configured length and doesn't start with 0, prepend CC
         if ($default_cc && $local_len > 0 && strlen($clean) == $local_len && strpos($clean, '0') !== 0) {
             $clean = $default_cc . $clean;
         }
 
-        // 3. Handle 00 prefix
-        if (strpos($clean, '00') === 0) {
-            $remaining = substr($clean, 2);
-            if (!empty($remaining) && ctype_digit($remaining)) {
-                $clean = $remaining;
-            }
-        }
-        // 4. Handle single 0 prefix
-        elseif (strpos($clean, '0') === 0) {
+        // 4. Handle leading 0 (replace with CC)
+        if (strpos($clean, '0') === 0) {
             $clean = $default_cc . substr($clean, 1);
         }
 
-        // 5. Final numeric guard
+        // 5. Fix double-prefix (e.g. 44077... -> 4477...)
+        if ($default_cc && strpos($clean, $default_cc . '0') === 0) {
+            $clean = $default_cc . substr($clean, strlen($default_cc) + 1);
+        }
+
+        // 6. Final numeric guard
         return ctype_digit($clean) ? $clean : '';
     }
 

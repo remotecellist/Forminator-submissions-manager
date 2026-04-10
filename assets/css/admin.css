@@ -1,49 +1,21 @@
-/* ── Settings Page ── */
-.wsm-sort-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-    cursor: grab;
-    font-size: 13px;
-    font-weight: 500;
-    transition: box-shadow .15s, background .15s;
-    user-select: none;
+:root {
+    --wsm-primary: #2271b1;
+    --wsm-primary-hsl: 209, 68%, 41%;
+    --wsm-success: #00a32a;
+    --wsm-danger: #d63638;
+    --wsm-bg-card: #ffffff;
+    --wsm-border: #dcdcde;
+    --wsm-text-main: #2c3338;
+    --wsm-text-muted: #646970;
+    --wsm-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+    --wsm-radius: 8px;
 }
 
-.wsm-sort-item:active {
-    cursor: grabbing;
-}
-
-.wsm-sort-item.wsm-dragging {
-    opacity: .45;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
-    background: #f0f6fc;
-}
-
-.wsm-sort-item.wsm-drag-over {
-    border-color: #2271b1;
-    background: #f0f6fc;
-}
-
-.wsm-drag-handle {
-    font-size: 18px;
-    color: #aaa;
-    line-height: 1;
-    cursor: grab;
-}
-
-.wsm-sort-label {
-    flex: 1;
-}
-
-/* ── Dashboard Base ── */
+/* ── Base Layout ── */
 .wsm-wrap {
-    max-width: 1400px;
+    max-width: 1440px;
+    margin-right: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 .wsm-wrap *,
@@ -52,47 +24,274 @@
     box-sizing: border-box;
 }
 
-/* ── Tabs ── */
-.wsm-tabs {
+/* ── Layout & Grid ── */
+.wsm-settings-flex-container {
     display: flex;
-    gap: 2px;
-    margin: 20px 0 0;
-    border-bottom: 2px solid #2271b1;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+.wsm-settings-section {
+    background: var(--wsm-bg-card);
+    border: 1px solid var(--wsm-border);
+    border-radius: var(--wsm-radius);
+    padding: 28px;
+    box-shadow: var(--wsm-shadow);
+    margin-bottom: 32px;
+}
+
+.wsm-section-forms {
+    flex: 2;
+    min-width: 0;
+}
+
+.wsm-section-tabs {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Settings Table Refinements ── */
+.wsm-settings-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    table-layout: auto;
+    /* Allow columns to adapt */
+}
+
+.wsm-settings-table th,
+.wsm-settings-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+    /* Important for aligned rows */
+}
+
+/* Specific Column Widths */
+.wsm-settings-table th:nth-child(1),
+.wsm-settings-table td:nth-child(1) {
+    width: 60px;
+}
+
+.wsm-settings-table th:nth-child(2),
+.wsm-settings-table td:nth-child(2) {
+    min-width: 120px;
+}
+
+.wsm-settings-table th:nth-child(3),
+.wsm-settings-table td:nth-child(3) {
+    width: 70px;
+    text-align: center;
+}
+
+.wsm-settings-table th:nth-child(4),
+.wsm-settings-table td:nth-child(4) {
+    min-width: 180px;
+}
+
+/* Legacy */
+.wsm-settings-table th:nth-child(5),
+.wsm-settings-table td:nth-child(5) {
+    min-width: 240px;
+}
+
+/* Legacy */
+
+/* ── Duplication Settings Container ── */
+.wsm-duplicate-fields-options {
+    max-height: 140px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.wsm-field-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--wsm-text-main);
+}
+
+.wsm-field-key {
+    color: var(--wsm-text-muted);
+    font-size: 10px;
+}
+
+/* ── Legacy Data Box ── */
+.wsm-legacy-container {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    min-width: 260px;
+}
+
+.wsm-legacy-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.wsm-legacy-badge-active {
+    background: hsla(140, 100%, 32%, 0.1);
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.wsm-btn-link-danger {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+}
+
+.wsm-btn-link-danger:hover {
+    color: #b91c1c;
+}
+
+.wsm-legacy-import-ui input[type="file"] {
+    font-size: 11px;
+    width: 100%;
+}
+
+/* ── Tabs Ordering ── */
+.wsm-sortable-list {
+    margin: 0;
+    padding: 0;
+}
+
+.wsm-sort-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid var(--wsm-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.wsm-sort-item:hover {
+    border-color: var(--wsm-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.wsm-drag-handle {
+    color: #cbd5e1;
+    cursor: grab;
+    font-size: 20px;
+}
+
+.wsm-sort-label {
+    flex: 1;
+    font-weight: 600;
+    color: var(--wsm-text-main);
+}
+
+.wsm-sort-id {
+    font-family: monospace;
+    color: var(--wsm-text-muted);
+}
+
+/* ── Global Settings Form ── */
+.wsm-global-settings .form-table th {
+    width: 200px;
+    padding: 16px 0;
+}
+
+.wsm-global-settings input[type="text"],
+.wsm-global-settings input[type="number"] {
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+/* ─── Dashboard Modernization ────────────────────────────────────────────── */
+
+.wsm-tabs {
+    border-bottom: 1px solid #dcdcde;
+    margin-bottom: 24px;
 }
 
 .wsm-tab {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 16px;
-    background: #f0f0f1;
-    border: 1px solid #c3c4c7;
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-    text-decoration: none;
-    color: #3c434a;
-    font-weight: 500;
-    font-size: 13px;
-    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    padding: 12px 20px;
+    font-weight: 600;
+    color: var(--wsm-text-muted);
+    transition: color 0.2s;
 }
 
 .wsm-tab:hover {
-    background: #fff;
+    color: var(--wsm-primary);
+    background: transparent;
 }
 
 .wsm-tab-active {
-    background: #fff !important;
-    border-color: #2271b1;
-    color: #2271b1;
-    margin-bottom: -2px;
+    color: var(--wsm-primary) !important;
+    border-bottom: 3px solid var(--wsm-primary);
+    background: transparent !important;
 }
 
-/* ── New-submission badge on tabs ── */
+.wsm-badge-legacy {
+    background: #6c5ce7;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(108, 92, 231, 0.2);
+}
+
+/* Status Badges on Dashboard */
+.wsm-status-select {
+    border-width: 1px !important;
+    border-radius: 30px !important;
+    padding-left: 15px !important;
+    font-size: 12px !important;
+    height: 32px !important;
+}
+
+/* ── Form Selection column specific tweaks ── */
+.wsm-section-forms .widefat th:nth-child(3),
+.wsm-section-forms .widefat td:nth-child(3),
+.wsm-section-forms .widefat th:nth-child(4),
+.wsm-section-forms .widefat td:nth-child(4) {
+    text-align: center;
+    width: 100px;
+}
+
+/* ── Restoration of functional Dashboard styles ── */
+
 .wsm-new-badge {
     display: inline-flex;
     align-items: center;
@@ -100,13 +299,12 @@
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
-    background: #d63638;
+    background: var(--wsm-danger);
     color: #fff;
     border-radius: 30px;
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
-    letter-spacing: 0;
     animation: wsm-pulse 2.5s ease-in-out infinite;
 }
 
@@ -122,75 +320,41 @@
     }
 }
 
-/* ── New-row indicator dot ── */
 .wsm-row-new-dot {
-    color: #d63638;
+    color: var(--wsm-danger);
     font-size: 10px;
     margin-left: 4px;
     vertical-align: middle;
-    line-height: 1;
 }
 
-/* Subtle left-border highlight on new rows */
 .wsm-row-new>td:first-child {
-    border-left: 3px solid #d63638;
+    border-left: 4px solid var(--wsm-danger) !important;
 }
 
-/* ── Filters ── */
 .wsm-filters {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 12px 0;
+    gap: 8px;
+    padding: 16px 0;
     flex-wrap: wrap;
 }
 
-.wsm-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border: 1.5px solid var(--badge-color, #999);
-    border-radius: 30px;
-    text-decoration: none;
-    color: var(--badge-color, #555);
-    font-size: 12px;
-    font-weight: 500;
-    transition: all .15s;
-    white-space: nowrap;
-}
-
-.wsm-badge:hover,
-.wsm-badge-active {
-    background: var(--badge-color, #555);
-    color: #fff;
-}
-
-.wsm-badge-active {
-    --badge-color: #2271b1;
-}
-
-.wsm-total {
-    font-size: 12px;
-    color: #888;
-    margin-left: 4px;
-}
-
-/* ── Toolbar ── */
 .wsm-toolbar {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px 12px;
-    margin: 10px 0 6px;
-    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--wsm-bg-card);
+    border: 1px solid var(--wsm-border);
+    border-radius: var(--wsm-radius);
+    padding: 12px 16px;
+    margin: 16px 0;
+    box-shadow: var(--wsm-shadow);
 }
 
 .wsm-toolbar-check {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
@@ -198,89 +362,42 @@
 
 .wsm-toolbar-sep {
     width: 1px;
-    height: 22px;
-    background: #ddd;
-    flex-shrink: 0;
+    height: 24px;
+    background: var(--wsm-border);
 }
 
 .wsm-toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     margin-left: auto;
-    flex-wrap: wrap;
-}
-
-#wsm-bulk-controls {
     display: flex;
+    gap: 12px;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
 }
 
-#wsm-bulk-status-select {
-    padding: 5px 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    max-width: 140px;
-}
-
-/* ── Table ── */
-.wsm-table {
-    border-collapse: collapse;
-    font-size: 13px;
+.wsm-notes {
     width: 100%;
-}
-
-.wsm-table th {
-    background: #f6f7f7;
-    font-weight: 700;
-    padding: 10px 12px;
-    white-space: nowrap;
-}
-
-.wsm-table td {
-    padding: 10px 12px;
-    vertical-align: top;
-    border-top: 1px solid #f0f0f0;
-}
-
-.wsm-table tr:hover td {
-    background: #f9f9f9;
-}
-
-.wsm-row.wsm-selected td {
-    background: #f0f6fc !important;
-}
-
-.wsm-fields {
-    line-height: 1.8;
-}
-
-.wsm-field {
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid var(--wsm-border);
+    border-radius: 6px;
     font-size: 13px;
-    word-break: break-word;
+    transition: border-color 0.2s;
 }
 
-.wsm-duplicate-field {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 2px;
+.wsm-notes:focus {
+    border-color: var(--wsm-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px hsla(var(--wsm-primary-hsl), 0.2);
 }
 
 .wsm-dup-badge {
-    display: inline-block;
     background: #fff3cd;
     color: #856404;
     border: 1px solid #ffeeba;
     font-size: 10px;
     font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 3px;
-    margin-left: 6px;
-    vertical-align: middle;
-    cursor: help;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
 }
 
 .wsm-dup-original {
@@ -289,224 +406,83 @@
     border-color: #c3e6cb;
 }
 
-.wsm-label {
-    font-weight: 600;
-    color: #555;
-}
-
-.wsm-status-select {
-    width: 100%;
-    padding: 7px 8px;
-    border-radius: 4px;
-    border: 2px solid #ccc;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.wsm-notes {
-    width: 100%;
-    font-size: 13px;
-    resize: vertical;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-family: inherit;
-    min-height: 70px;
-}
-
-.wsm-notes:focus {
-    border-color: #2271b1;
-    outline: none;
-    box-shadow: 0 0 0 1px #2271b1;
-}
-
-.wsm-save-btn {
-    white-space: nowrap;
-    width: 100%;
-}
-
-.wsm-msg {
-    font-size: 11.5px;
-    font-weight: 600;
-    margin-top: 5px;
-    min-height: 16px;
-}
-
-/* ── Pagination ── */
-.wsm-pagination {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    margin: 16px 0;
-    flex-wrap: wrap;
-}
-
-.wsm-page-info {
-    margin-left: 8px;
-    font-size: 13px;
-    color: #666;
-}
-
-/* ── Mobile ── */
+/* ── Mobile Responsiveness ── */
 @media screen and (max-width: 782px) {
-    .wsm-wrap {
-        padding: 0 4px;
+    .wsm-settings-flex-container {
+        flex-direction: column;
+    }
+
+    .wsm-settings-section {
+        padding: 16px;
     }
 
     .wsm-toolbar {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .wsm-toolbar-sep {
-        display: none;
+        align-items: stretch;
     }
 
     .wsm-toolbar-right {
         margin-left: 0;
-        width: 100%;
-        justify-content: flex-start;
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    #wsm-bulk-controls {
-        width: 100%;
+    .wsm-tab {
+        padding: 10px 12px;
+        font-size: 12px;
     }
 
-    #wsm-bulk-status-select {
-        max-width: 100%;
-        flex: 1;
-    }
-
-    #wsm-bulk-controls .button {
-        flex: 1;
-        text-align: center;
-    }
-
-    #wsm-save-all-btn {
-        width: 100%;
-        text-align: center;
-    }
-
-    .wsm-filters {
-        gap: 5px;
-    }
-
-    .wsm-total {
-        width: 100%;
-        margin-left: 0;
-    }
-
-    .wsm-table thead {
+    /* ── Responsive Card Table ── */
+    .wsm-settings-table thead {
         display: none;
     }
 
-    .wsm-table,
-    .wsm-table tbody,
-    .wsm-table tr,
-    .wsm-table td {
+    .wsm-settings-table,
+    .wsm-settings-table tbody,
+    .wsm-settings-table tr,
+    .wsm-settings-table td {
         display: block;
         width: 100%;
     }
 
-    .wsm-row {
+    .wsm-settings-table tr {
+        margin-bottom: 16px;
+        border: 1px solid var(--wsm-border);
+        border-radius: var(--wsm-radius);
+        padding: 16px;
         background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        margin-bottom: 12px;
-        padding: 0;
-        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-    .wsm-row.wsm-selected {
-        border-color: #2271b1;
-    }
-
-    .wsm-row-new {
-        border-left: 3px solid #d63638 !important;
-    }
-
-    .wsm-row td {
-        border-top: 1px solid #f0f0f0;
-        padding: 10px 14px;
-    }
-
-    .wsm-row td:first-child {
-        border-top: none;
-    }
-
-    .wsm-row td:nth-child(1) {
+    .wsm-settings-table td {
         display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #f6f7f7;
-        padding: 8px 14px;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 0;
+        text-align: left;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .wsm-settings-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .wsm-settings-table td:first-child {
+        padding-top: 0;
+    }
+
+    .wsm-settings-table td::before {
+        content: attr(data-label);
         font-weight: 700;
+        font-size: 11px;
+        color: var(--wsm-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 4px;
     }
-
-    .wsm-row td:nth-child(3) {
-        font-size: 11.5px;
-        color: #666;
-        padding-top: 6px;
-        padding-bottom: 6px;
-    }
-
-    .wsm-status-select {
-        font-size: 15px;
-        padding: 10px 12px;
-    }
-
-    .wsm-notes {
-        min-height: 80px;
-        font-size: 14px;
-    }
-
-    .wsm-save-btn {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    .wsm-pagination {
-        gap: 6px;
-    }
-
-    .wsm-pagination .button {
-        padding: 6px 12px;
-    }
-}
-
-/* ─── LEGACY DATA BADGES ────────────────────────────────────────────────── */
-
-.wsm-badge-legacy {
-    --badge-color: #6c5ce7;
-    background: var(--badge-color);
-    color: #fff !important;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-bottom: 4px;
-    box-shadow: 0 2px 4px rgba(108, 92, 231, 0.2);
-}
-
-.wsm-legacy-container {
-    background: #fff;
-    padding: 10px;
-    border: 1px solid #e5e5e5;
-    border-radius: 6px;
-    max-width: 220px;
-}
-
-.wsm-legacy-mapping label {
-    font-weight: 500;
-    color: #444;
-}
-
-.wsm-legacy-mapping select {
-    border: 1px solid #ccc;
-    box-shadow: none;
-    background: #fff;
 }

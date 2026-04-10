@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Web Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.9
+ * Version: 1.0.19
  * Author: Syed Badar Abbas
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH'))
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────
 
-define('WSM_VERSION', '1.0.9');
+define('WSM_VERSION', '1.0.19');
 define('WSM_TABLE_ENTRIES', $GLOBALS['wpdb']->prefix . 'wsm_entries');
 define('WSM_TABLE_FORMS', $GLOBALS['wpdb']->prefix . 'wsm_forms');
 define('WSM_TABLE_LEGACY', $GLOBALS['wpdb']->prefix . 'wsm_legacy_data');
@@ -96,13 +96,20 @@ class WebSubmissionsManager
     public function maybe_install()
     {
         $db_version = get_option('wsm_db_version');
-        if ($db_version !== WSM_VERSION) {
+
+        // Re-check table existence just in case dbDelta failed previously
+        global $wpdb;
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '" . WSM_TABLE_LEGACY . "'");
+
+        if ($db_version !== WSM_VERSION || !$table_exists) {
             $this->install();
 
-            // Run migration if updating to 1.0.9
-            if (version_compare($db_version, '1.0.9', '<')) {
+            // Run migration if updating to or from version < 1.0.11
+            if (!$db_version || version_compare((string) $db_version, '1.0.11', '<')) {
                 $this->run_legacy_migration();
             }
+
+            update_option('wsm_db_version', WSM_VERSION);
         }
     }
 
