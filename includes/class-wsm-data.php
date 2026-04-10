@@ -225,26 +225,32 @@ class WSM_Data
         ));
     }
 
-    public static function wsm_normalise_phone($number, $default_cc = '')
+    public static function wsm_normalise_phone($number, $default_cc = '', $local_len = 0)
     {
         // 1. Strip all non-digits
         $clean = preg_replace('/\D/', '', $number);
         if (empty($clean))
             return '';
 
-        // 2. Handle 00 prefix
+        // 2. Fix missing leading zero (e.g. 7700900123 -> 447700900123)
+        // If it matches configured length and doesn't start with 0, prepend CC
+        if ($default_cc && $local_len > 0 && strlen($clean) == $local_len && strpos($clean, '0') !== 0) {
+            $clean = $default_cc . $clean;
+        }
+
+        // 3. Handle 00 prefix
         if (strpos($clean, '00') === 0) {
             $remaining = substr($clean, 2);
             if (!empty($remaining) && ctype_digit($remaining)) {
                 $clean = $remaining;
             }
         }
-        // 3. Handle single 0 prefix
+        // 4. Handle single 0 prefix
         elseif (strpos($clean, '0') === 0) {
             $clean = $default_cc . substr($clean, 1);
         }
 
-        // 4. Final numeric guard
+        // 5. Final numeric guard
         return ctype_digit($clean) ? $clean : '';
     }
 

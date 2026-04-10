@@ -167,10 +167,11 @@ function wsm_page_dashboard()
     if ($match_field && !empty($entries)) {
         $vals_to_check = [];
         $default_cc = get_option('wsm_default_cc', '44');
+        $local_len = intval(get_option('wsm_local_number_length', 10));
         foreach ($entries as $e) {
             $raw = $e->fields[$match_field] ?? '';
             if ($raw) {
-                $normalised = WSM_Data::wsm_normalise_phone($raw, $default_cc);
+                $normalised = WSM_Data::wsm_normalise_phone($raw, $default_cc, $local_len);
                 if ($normalised)
                     $vals_to_check[] = $normalised;
             }
@@ -386,7 +387,9 @@ function wsm_page_dashboard()
                                 // Render Legacy Badges
                                 if ($match_field) {
                                     $raw_val = $entry->fields[$match_field] ?? '';
-                                    $norm = WSM_Data::wsm_normalise_phone($raw_val, get_option('wsm_default_cc', '44'));
+                                    $default_cc = get_option('wsm_default_cc', '44');
+                                    $local_len = intval(get_option('wsm_local_number_length', 10));
+                                    $norm = WSM_Data::wsm_normalise_phone($raw_val, $default_cc, $local_len);
                                     if (isset($legacy_matches[$norm])) {
                                         $uids = $legacy_matches[$norm];
                                         echo '<div class="wsm-badge-legacy" title="Matched in legacy data">Legacy: #' . esc_html(implode(', #', $uids)) . '</div><br>';

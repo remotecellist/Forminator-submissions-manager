@@ -12,6 +12,11 @@ Web Submissions Manager allows you to extend Forminator by adding custom workflo
 
 ## Changelog
 
+### 1.0.9
+- Fixed: Improved phone normalization to handle numbers missing leading zeros (common in CSV exports).
+- Added: "Local Number Length" setting to control automatic country code prepending.
+- Feature: Automatic background migration of existing legacy data on update.
+
 ### 1.0.8
 - **Feature**: Added Legacy Data Integration with CSV import support.
 - **Feature**: Selective phone normalization utility for accurate matching.

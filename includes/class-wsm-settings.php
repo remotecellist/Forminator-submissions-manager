@@ -47,11 +47,13 @@ class WSM_Settings {
     }
 
     public function render_page() {
+        global $wpdb;
         $all_forms   = WSM_Data::get_forminator_forms();
         $tracked_ids = WSM_Data::get_tracked_form_ids();
         $dup_fields_map = get_option( 'wsm_duplicate_fields', [] );
         $dup_form_ids = get_option( 'wsm_track_duplicate_forms', [] );
         $default_cc  = get_option( 'wsm_default_cc', '44' );
+        $local_len   = get_option( 'wsm_local_number_length', '10' );
         $legacy_config = get_option( 'wsm_legacy_config', [] );
         ?>
         <div class="wrap wsm-wrap">
@@ -153,7 +155,18 @@ class WSM_Settings {
                                                     <label style="display:block; font-size:11px; margin-top:4px;">Match Value (Phone) Col: 
                                                         <select class="wsm-csv-match-col" style="width:100%; font-size:11px; height:24px;"></select>
                                                     </label>
-                                                    <label style="display:block; font-size:11px; margin-top:4px;">Forminator Field: 
+                                                    <div style="display:flex; gap:20px; align-items:center;">
+                                    <div>
+                                        <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Default Country Code</label>
+                                        <input type="text" name="wsm_default_cc" value="<?php echo esc_attr( $default_cc ); ?>" style="width:60px; font-weight:700; text-align:center;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Local Number Length</label>
+                                        <input type="number" name="wsm_local_number_length" value="<?php echo esc_attr( $local_len ); ?>" style="width:80px; font-weight:700; text-align:center;" min="5" max="20">
+                                        <span style="font-size:11px; color:#999; margin-left:5px;">(Add CC if this length met)</span>
+                                    </div>
+                                </div>
+                                                            <label style="display:block; font-size:11px; margin-top:4px;">Forminator Field: 
                                                         <select class="wsm-form-field-key" style="width:100%; font-size:11px; height:24px;">
                                                             <?php foreach ($fields as $fk): ?>
                                                                 <option value="<?php echo esc_attr($fk); ?>" <?php selected($fk, $config['match_field'] ?? ''); ?>><?php echo esc_html($fk); ?></option>
@@ -243,6 +256,7 @@ class WSM_Settings {
         update_option('wsm_track_duplicate_forms', $track_dups);
 
         update_option('wsm_default_cc', sanitize_text_field($_POST['wsm_default_cc'] ?? '44'));
+        update_option('wsm_local_number_length', intval($_POST['wsm_local_number_length'] ?? 10));
 
         wp_send_json_success();
     }
@@ -293,6 +307,7 @@ class WSM_Settings {
 
         $headers = fgetcsv( $tmp_handle );
         $default_cc = get_option( 'wsm_default_cc', '44' );
+        $local_len  = intval( get_option( 'wsm_local_number_length', 10 ) );
         
         global $wpdb;
         $wpdb->query( "START TRANSACTION" );
@@ -302,7 +317,7 @@ class WSM_Settings {
         while ( ( $row = fgetcsv( $tmp_handle ) ) !== false ) {
             $uid = sanitize_text_field( $row[$uid_col] ?? '' );
             $raw_val = $row[$val_col] ?? '';
-            $normalised = WSM_Data::wsm_normalise_phone( $raw_val, $default_cc );
+            $normalised = WSM_Data::wsm_normalise_phone( $raw_val, $default_cc, $local_len );
 
             if ( $uid && $normalised ) {
                 $wpdb->insert( WSM_TABLE_LEGACY, [

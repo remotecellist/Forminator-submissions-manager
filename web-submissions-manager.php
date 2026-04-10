@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Web Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Syed Badar Abbas
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH'))
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────
 
-define('WSM_VERSION', '1.0.8');
+define('WSM_VERSION', '1.0.9');
 define('WSM_TABLE_ENTRIES', $GLOBALS['wpdb']->prefix . 'wsm_entries');
 define('WSM_TABLE_FORMS', $GLOBALS['wpdb']->prefix . 'wsm_forms');
 define('WSM_TABLE_LEGACY', $GLOBALS['wpdb']->prefix . 'wsm_legacy_data');
@@ -95,8 +95,39 @@ class WebSubmissionsManager
 
     public function maybe_install()
     {
-        if (get_option('wsm_db_version') !== WSM_VERSION) {
+        $db_version = get_option('wsm_db_version');
+        if ($db_version !== WSM_VERSION) {
             $this->install();
+
+            // Run migration if updating to 1.0.9
+            if (version_compare($db_version, '1.0.9', '<')) {
+                $this->run_legacy_migration();
+            }
+        }
+    }
+
+    private function run_legacy_migration()
+    {
+        global $wpdb;
+        $legacy_data = $wpdb->get_results("SELECT id, form_id, match_value FROM " . WSM_TABLE_LEGACY);
+        if (empty($legacy_data))
+            return;
+
+        $default_cc = get_option('wsm_default_cc', '44');
+        $local_len = intval(get_option('wsm_local_number_length', 10));
+
+        foreach ($legacy_data as $row) {
+            // Re-normalise with NEW logic
+            $new_val = WSM_Data::wsm_normalise_phone($row->match_value, $default_cc, $local_len);
+            if ($new_val && $new_val !== $row->match_value) {
+                $wpdb->update(
+                    WSM_TABLE_LEGACY,
+                    ['match_value' => $new_val],
+                    ['id' => $row->id],
+                    ['%s'],
+                    ['%d']
+                );
+            }
         }
     }
 
