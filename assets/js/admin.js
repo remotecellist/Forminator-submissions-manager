@@ -1,0 +1,331 @@
+(function ($) {
+    'use strict';
+
+    $(function () {
+        const { nonce, formId, exportNonce, statuses, statusColors } = wsmData;
+
+        // ─── SETTINGS PAGE LOGIC ─────────────────────────────────────────────
+
+        // Toggle duplicate fields container visibility
+        $('.wsm-track-dups-checkbox').on('change', function () {
+            const container = $(this).closest('tr').find('.wsm-duplicate-fields-container');
+            if (container.length) container.toggle(this.checked);
+        });
+
+        // Settings form save
+        $('#wsm-settings-form').on('submit', function (e) {
+            e.preventDefault();
+            const checked = $('.wsm-form-checkbox:checked').map((_, el) => el.value).get();
+            const order = $('.wsm-sort-item').map((_, el) => el.dataset.id).get();
+            const trackDups = $('.wsm-track-dups-checkbox:checked').map((_, el) => el.value).get();
+
+            const data = new FormData();
+            data.append('action', 'wsm_save_settings');
+            data.append('nonce', nonce);
+            checked.forEach(id => data.append('form_ids[]', id));
+            order.forEach(id => data.append('form_order[]', id));
+            trackDups.forEach(id => data.append('track_dup_forms[]', id));
+
+            const dupFieldsMap = {};
+            $('.wsm-duplicate-fields-input').each(function () {
+                const fidMatch = this.name.match(/\[(\d+)\]/);
+                if (fidMatch) dupFieldsMap[fidMatch[1]] = this.value;
+            });
+
+            $('.wsm-duplicate-fields-options').each(function () {
+                const fid = this.dataset.fid;
+                const checkedBoxes = $(this).find('.wsm-dup-check:checked').map((_, el) => el.value).get();
+                dupFieldsMap[fid] = checkedBoxes.join(', ');
+            });
+
+            for (const [fid, val] of Object.entries(dupFieldsMap)) {
+                data.append(`duplicate_fields[${fid}]`, val);
+            }
+
+            fetch(ajaxurl, { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(r => {
+                    const $msg = $('#wsm-settings-msg');
+                    $msg.text(r.success ? '✅ Saved!' : '❌ Error saving.');
+                    $msg.css('color', r.success ? 'green' : 'red');
+                    setTimeout(() => $msg.text(''), 3000);
+                    if (r.success) rebuildSortList(checked);
+                });
+        });
+
+        function rebuildSortList(checkedIds) {
+            const $list = $('#wsm-sortable-forms');
+            if (!$list.length) return;
+
+            $list.find('.wsm-sort-item').each(function () {
+                if (!checkedIds.includes(this.dataset.id)) $(this).remove();
+            });
+
+            const existing = $list.find('.wsm-sort-item').map((_, el) => el.dataset.id).get();
+            checkedIds.forEach(id => {
+                if (existing.includes(id)) return;
+                const row = $(`.wsm-form-checkbox[value="${id}"]`).closest('tr');
+                const name = row.length ? row.find('td:eq(1)').text().trim() : `Form #${id}`;
+                const $li = $('<li class="wsm-sort-item">')
+                    .attr('data-id', id)
+                    .html(`<span class="wsm-drag-handle" title="Drag to reorder">⠿</span><span class="wsm-sort-label">${name}</span><span class="wsm-sort-id" style="color:#999;font-size:12px;"> #${id}</span>`);
+                $list.append($li);
+                attachDragEvents($li[0]);
+            });
+        }
+
+        // Drag-and-drop reorder
+        let dragSrc = null;
+
+        function saveOrder() {
+            const order = $('.wsm-sort-item').map((_, el) => el.dataset.id).get();
+            const data = new FormData();
+            data.append('action', 'wsm_save_order');
+            data.append('nonce', nonce);
+            order.forEach(id => data.append('order[]', id));
+            fetch(ajaxurl, { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(r => {
+                    const $st = $('#wsm-order-status');
+                    if (!$st.length) return;
+                    $st.text(r.success ? '✅ Order saved!' : '❌ Save failed');
+                    $st.css('color', r.success ? '#00a32a' : '#d63638');
+                    setTimeout(() => $st.text(''), 2500);
+                });
+        }
+
+        function attachDragEvents(item) {
+            item.setAttribute('draggable', 'true');
+            item.addEventListener('dragstart', function (e) {
+                dragSrc = this;
+                this.classList.add('wsm-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            item.addEventListener('dragend', function () {
+                this.classList.remove('wsm-dragging');
+                $('.wsm-sort-item').removeClass('wsm-drag-over');
+                saveOrder();
+            });
+            item.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                $('.wsm-sort-item').removeClass('wsm-drag-over');
+                this.classList.add('wsm-drag-over');
+            });
+            item.addEventListener('drop', function (e) {
+                e.preventDefault();
+                if (dragSrc && dragSrc !== this) {
+                    const list = this.parentNode;
+                    const items = [...list.children];
+                    const srcIdx = items.indexOf(dragSrc);
+                    const destIdx = items.indexOf(this);
+                    if (srcIdx < destIdx) {
+                        list.insertBefore(dragSrc, this.nextSibling);
+                    } else {
+                        list.insertBefore(dragSrc, this);
+                    }
+                }
+                this.classList.remove('wsm-drag-over');
+            });
+        }
+
+        $('.wsm-sort-item').each(function () { attachDragEvents(this); });
+
+
+        // ─── DASHBOARD LOGIC ─────────────────────────────────────────────────
+
+        function updateWSMBadges(counts) {
+            if (!counts) return;
+            if (counts.form_new_count !== undefined) {
+                const tab = document.querySelector(`.wsm-tab[data-tab-fid="${formId}"]`);
+                if (tab) {
+                    let badge = tab.querySelector('.wsm-new-badge');
+                    if (counts.form_new_count > 0) {
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'wsm-new-badge';
+                            tab.appendChild(badge);
+                        }
+                        badge.title = `${counts.form_new_count} new submission(s)`;
+                        badge.textContent = counts.form_new_count > 99 ? '99+' : counts.form_new_count;
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
+            }
+            if (counts.total_new_count !== undefined) {
+                const menuItem = document.querySelector('#toplevel_page_wsm-dashboard .wp-menu-name');
+                if (menuItem) {
+                    let badge = menuItem.querySelector('.update-plugins');
+                    if (counts.total_new_count > 0) {
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            menuItem.appendChild(badge);
+                        }
+                        badge.className = `update-plugins count-${counts.total_new_count}`;
+                        badge.innerHTML = `<span class="plugin-count">${counts.total_new_count}</span>`;
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
+            }
+        }
+
+        function paintSelect(sel) {
+            const colors = statusColors || {};
+            const apply = () => { const c = colors[sel.value] || '#555'; sel.style.borderColor = c; sel.style.color = c; };
+            apply();
+            sel.addEventListener('change', function () {
+                apply();
+                const row = sel.closest('.wsm-row');
+                if (sel.value !== 'New') {
+                    row.classList.remove('wsm-row-new');
+                    const dot = row.querySelector('.wsm-row-new-dot');
+                    if (dot) dot.remove();
+                } else {
+                    row.classList.add('wsm-row-new');
+                }
+            });
+        }
+        document.querySelectorAll('.wsm-status-select').forEach(paintSelect);
+
+        function saveRow(row, btn, msg) {
+            btn.disabled = true; btn.textContent = 'Saving…';
+            const body = new FormData();
+            body.append('action', 'wsm_save');
+            body.append('nonce', nonce);
+            body.append('entry_id', row.dataset.entry);
+            body.append('form_id', formId);
+            body.append('status', row.querySelector('.wsm-status-select').value);
+            body.append('notes', row.querySelector('.wsm-notes').value);
+            return fetch(ajaxurl, { method: 'POST', body })
+                .then(r => r.json())
+                .then(r => {
+                    msg.textContent = r.success ? '✅ Saved' : '❌ Error';
+                    msg.style.color = r.success ? '#00a32a' : '#d63638';
+                    if (r.success && r.data) updateWSMBadges(r.data);
+                })
+                .catch(() => { msg.textContent = '❌ Failed'; msg.style.color = '#d63638'; })
+                .finally(() => { btn.disabled = false; btn.textContent = 'Save'; setTimeout(() => msg.textContent = '', 4000); });
+        }
+
+        $('.wsm-save-btn').on('click', function () {
+            const row = this.closest('.wsm-row');
+            saveRow(row, this, row.querySelector('.wsm-msg'));
+        });
+
+        const $headCheck = $('#wsm-head-check');
+        const $checkAll = $('#wsm-check-all');
+        const $bulkPanel = $('#wsm-bulk-controls');
+
+        function getChecked() {
+            return $('.wsm-row-check:checked');
+        }
+        function updateBulkPanel() {
+            const any = getChecked().length > 0;
+            $bulkPanel.toggle(any);
+            if (any) $bulkPanel.css('display', 'flex');
+        }
+        function syncRowHighlight(cb) {
+            $(cb).closest('.wsm-row').toggleClass('wsm-selected', cb.checked);
+        }
+
+        $('.wsm-row-check').on('change', function () {
+            syncRowHighlight(this);
+            updateBulkPanel();
+        });
+
+        $([$headCheck[0], $checkAll[0]]).on('change', function () {
+            const checked = this.checked;
+            $('.wsm-row-check').each(function () {
+                this.checked = checked;
+                syncRowHighlight(this);
+            });
+            $headCheck.prop('checked', checked);
+            $checkAll.prop('checked', checked);
+            updateBulkPanel();
+        });
+
+        $('#wsm-save-all-btn').on('click', function () {
+            const btn = this;
+            const $msg = $('#wsm-saveall-msg');
+            const $rows = $('.wsm-row');
+
+            btn.disabled = true; btn.textContent = 'Saving…';
+            const payload = $rows.map((_, row) => ({
+                entry_id: row.dataset.entry,
+                status: $(row).find('.wsm-status-select').val(),
+                notes: $(row).find('.wsm-notes').val(),
+            })).get();
+
+            const body = new FormData();
+            body.append('action', 'wsm_bulk_save');
+            body.append('nonce', nonce);
+            body.append('form_id', formId);
+            payload.forEach((r, i) => {
+                body.append(`rows[${i}][entry_id]`, r.entry_id);
+                body.append(`rows[${i}][status]`, r.status);
+                body.append(`rows[${i}][notes]`, r.notes);
+            });
+
+            fetch(ajaxurl, { method: 'POST', body })
+                .then(r => r.json())
+                .then(r => {
+                    $msg.text(r.success ? `✅ Saved ${r.data?.saved ?? $rows.length} rows` : '❌ Error');
+                    $msg.css('color', r.success ? '#00a32a' : '#d63638');
+                    if (r.success && r.data) updateWSMBadges(r.data);
+                })
+                .catch(() => { $msg.text('❌ Failed'); $msg.css('color', '#d63638'); })
+                .finally(() => { btn.disabled = false; btn.textContent = '💾 Save All'; setTimeout(() => $msg.text(''), 5000); });
+        });
+
+        $('#wsm-bulk-status-btn').on('click', function () {
+            const status = $('#wsm-bulk-status-select').val();
+            const $msg = $('#wsm-bulk-msg');
+            const $checked = getChecked();
+            const ids = $checked.map((_, cb) => cb.value).get();
+
+            if (!status) { $msg.text('Pick a status first').css('color', '#d63638'); return; }
+            if (!ids.length) return;
+
+            this.disabled = true;
+            const body = new FormData();
+            body.append('action', 'wsm_bulk_status');
+            body.append('nonce', nonce);
+            body.append('form_id', formId);
+            body.append('status', status);
+            ids.forEach(id => body.append('entry_ids[]', id));
+
+            fetch(ajaxurl, { method: 'POST', body })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.success) {
+                        ids.forEach(id => {
+                            const $row = $(`.wsm-row[data-entry="${id}"]`);
+                            if (!$row.length) return;
+                            const sel = $row.find('.wsm-status-select')[0];
+                            sel.value = status;
+                            paintSelect(sel);
+                            if (status !== 'New') {
+                                $row.removeClass('wsm-row-new');
+                                $row.find('.wsm-row-new-dot').remove();
+                            }
+                        });
+                        $msg.text(`✅ Updated ${ids.length} rows`).css('color', '#00a32a');
+                        if (r.data) updateWSMBadges(r.data);
+                    } else {
+                        $msg.text('❌ Error').css('color', '#d63638');
+                    }
+                })
+                .catch(() => { $msg.text('❌ Failed').css('color', '#d63638'); })
+                .finally(() => { this.disabled = false; setTimeout(() => $msg.text(''), 5000); });
+        });
+
+        $('#wsm-bulk-export-btn').on('click', function () {
+            const ids = getChecked().map((_, cb) => cb.value).get().join(',');
+            if (!ids) return;
+            window.location.href = `${ajaxurl.replace('admin-ajax.php', 'admin.php')}?wsm_export=1&form_id=${formId}&entry_ids=${ids}&_wpnonce=${exportNonce}`;
+        });
+
+    });
+})(jQuery);
