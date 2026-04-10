@@ -12,6 +12,13 @@ Web Submissions Manager allows you to extend Forminator by adding custom workflo
 
 ## Changelog
 
+### 1.0.8
+- **Feature**: Added Legacy Data Integration with CSV import support.
+- **Feature**: Selective phone normalization utility for accurate matching.
+- **UI**: Triple-column mapping (Legacy UID, Match Value, Forminator Field).
+- **UI**: Added bulk legacy match badges (`Legacy: #ID`) in dashboard.
+- **Settings**: Added "Default Country Code" global setting.
+
 ### 1.0.7
 - **Refactor**: Modularized codebase into separate classes for better maintainability.
 - **Refactor**: Moved CSS and JavaScript to external files with versioning.

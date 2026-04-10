@@ -157,6 +157,28 @@ function wsm_page_dashboard()
 
     $entries = WSM_Data::get_forminator_entries($active_form_id, $per_page, $offset, $status_filter, $search_query);
     $total = WSM_Data::count_entries($active_form_id, $status_filter, $search_query);
+
+    // ─── Legacy Match Bulk Lookup ───
+    $legacy_config = get_option('wsm_legacy_config', []);
+    $config = $legacy_config[$active_form_id] ?? [];
+    $match_field = $config['match_field'] ?? '';
+    $legacy_matches = [];
+
+    if ($match_field && !empty($entries)) {
+        $vals_to_check = [];
+        $default_cc = get_option('wsm_default_cc', '44');
+        foreach ($entries as $e) {
+            $raw = $e->fields[$match_field] ?? '';
+            if ($raw) {
+                $normalised = WSM_Data::wsm_normalise_phone($raw, $default_cc);
+                if ($normalised)
+                    $vals_to_check[] = $normalised;
+            }
+        }
+        if (!empty($vals_to_check)) {
+            $legacy_matches = WSM_Data::get_legacy_matches($active_form_id, array_unique($vals_to_check));
+        }
+    }
     $total_pgs = (int) ceil($total / $per_page);
 
     $all_dup_fields = get_option('wsm_duplicate_fields', []);
@@ -274,7 +296,8 @@ function wsm_page_dashboard()
                     style="padding:2px 6px; font-size:13px; vertical-align:middle;">
                 <button type="submit" class="button button-small" style="vertical-align:middle;">Search</button>
                 <?php if ($search_query): ?>
-                    <a href="<?php echo esc_url(admin_url("admin.php?page=wsm-dashboard&form_id=$active_form_id" . ($status_filter ? '&status_filter=' . urlencode($status_filter) : ''))); ?>" style="font-size:12px;
+                    <a href="<?php echo esc_url(admin_url("admin.php?page=wsm-dashboard&form_id=$active_form_id" . ($status_filter ? '&status_filter=' . urlencode($status_filter) : ''))); ?>"
+                        style="font-size:12px;
                 margin-left:5px; text-decoration:none; color:#a00;">&times; Clear</a>
                 <?php endif; ?>
             </form>
@@ -359,7 +382,18 @@ function wsm_page_dashboard()
                                 <?php echo esc_html(date_i18n('d M Y H:i', strtotime($entry->date_created))); ?>
                             </td>
                             <td class="wsm-fields" data-label="Fields">
-                                <?php foreach ($entry->fields as $key => $val):
+                                <?php
+                                // Render Legacy Badges
+                                if ($match_field) {
+                                    $raw_val = $entry->fields[$match_field] ?? '';
+                                    $norm = WSM_Data::wsm_normalise_phone($raw_val, get_option('wsm_default_cc', '44'));
+                                    if (isset($legacy_matches[$norm])) {
+                                        $uids = $legacy_matches[$norm];
+                                        echo '<div class="wsm-badge-legacy" title="Matched in legacy data">Legacy: #' . esc_html(implode(', #', $uids)) . '</div><br>';
+                                    }
+                                }
+
+                                foreach ($entry->fields as $key => $val):
                                     $label = ucwords(str_replace(['-', '_'], ' ', $key));
                                     $is_dup = isset($duplicates[$key][$val]);
                                     $is_first = $is_dup && $duplicates[$key][$val]['first_entry_id'] == $entry->entry_id;

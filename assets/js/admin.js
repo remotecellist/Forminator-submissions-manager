@@ -42,6 +42,11 @@
                 data.append(`duplicate_fields[${fid}]`, val);
             }
 
+            const globalData = new FormData($('#wsm-global-settings')[0]);
+            for (const [key, val] of globalData.entries()) {
+                data.append(key, val);
+            }
+
             fetch(ajaxurl, { method: 'POST', body: data })
                 .then(r => r.json())
                 .then(r => {
@@ -50,6 +55,92 @@
                     $msg.css('color', r.success ? 'green' : 'red');
                     setTimeout(() => $msg.text(''), 3000);
                     if (r.success) rebuildSortList(checked);
+                });
+        });
+
+        // Legacy CSV mapping logic
+        $(document).on('change', '.wsm-legacy-file', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const $container = $(this).closest('.wsm-legacy-container');
+            const $mapping = $container.find('.wsm-legacy-mapping');
+            const $uidSel = $container.find('.wsm-csv-uid-col');
+            const $valSel = $container.find('.wsm-csv-match-col');
+
+            const data = new FormData();
+            data.append('action', 'wsm_get_csv_headers');
+            data.append('nonce', nonce);
+            data.append('file', file);
+
+            fetch(ajaxurl, { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.success) {
+                        $uidSel.empty();
+                        $valSel.empty();
+                        r.data.forEach((h, i) => {
+                            $uidSel.append(`<option value="${i}">${h}</option>`);
+                            $valSel.append(`<option value="${i}">${h}</option>`);
+                        });
+                        $mapping.slideDown();
+                    } else {
+                        alert(r.data || 'Error reading CSV headers.');
+                    }
+                });
+        });
+
+        $(document).on('click', '.wsm-start-import', function () {
+            const btn = this;
+            const $container = $(this).closest('.wsm-legacy-container');
+            const fid = this.dataset.fid;
+            const file = $container.find('.wsm-legacy-file')[0].files[0];
+            const uidCol = $container.find('.wsm-csv-uid-col').val();
+            const valCol = $container.find('.wsm-csv-match-col').val();
+            const matchField = $container.find('.wsm-form-field-key').val();
+
+            if (!file) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Importing...';
+
+            const data = new FormData();
+            data.append('action', 'wsm_import_legacy');
+            data.append('nonce', nonce);
+            data.append('form_id', fid);
+            data.append('uid_col', uidCol);
+            data.append('val_col', valCol);
+            data.append('match_field', matchField);
+            data.append('file', file);
+
+            fetch(ajaxurl, { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.success) {
+                        alert(`✅ Successfully imported ${r.data.count} records.`);
+                        location.reload();
+                    } else {
+                        alert(r.data || 'Import failed.');
+                    }
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Start Import';
+                });
+        });
+
+        $(document).on('click', '.wsm-clear-legacy', function () {
+            if (!confirm('Are you sure you want to clear all legacy data for this form?')) return;
+            const fid = this.dataset.fid;
+            const data = new FormData();
+            data.append('action', 'wsm_clear_legacy');
+            data.append('nonce', nonce);
+            data.append('form_id', fid);
+
+            fetch(ajaxurl, { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.success) location.reload();
                 });
         });
 

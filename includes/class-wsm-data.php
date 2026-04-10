@@ -224,4 +224,53 @@ class WSM_Data
             $form_id
         ));
     }
+
+    public static function wsm_normalise_phone($number, $default_cc = '')
+    {
+        // 1. Strip all non-digits
+        $clean = preg_replace('/\D/', '', $number);
+        if (empty($clean))
+            return '';
+
+        // 2. Handle 00 prefix
+        if (strpos($clean, '00') === 0) {
+            $remaining = substr($clean, 2);
+            if (!empty($remaining) && ctype_digit($remaining)) {
+                $clean = $remaining;
+            }
+        }
+        // 3. Handle single 0 prefix
+        elseif (strpos($clean, '0') === 0) {
+            $clean = $default_cc . substr($clean, 1);
+        }
+
+        // 4. Final numeric guard
+        return ctype_digit($clean) ? $clean : '';
+    }
+
+    public static function get_legacy_matches($form_id, $values)
+    {
+        if (empty($values))
+            return [];
+        global $wpdb;
+        $placeholders = implode(',', array_fill(0, count($values), '%s'));
+        $query = $wpdb->prepare(
+            "SELECT match_value, legacy_uid FROM " . WSM_TABLE_LEGACY . " 
+             WHERE form_id = %d AND match_value IN ($placeholders)",
+            array_merge([$form_id], $values)
+        );
+        $results = $wpdb->get_results($query);
+
+        $map = [];
+        foreach ($results as $row) {
+            $map[$row->match_value][] = $row->legacy_uid;
+        }
+        return $map;
+    }
+
+    public static function delete_legacy_data($form_id)
+    {
+        global $wpdb;
+        return $wpdb->delete(WSM_TABLE_LEGACY, ['form_id' => $form_id], ['%d']);
+    }
 }

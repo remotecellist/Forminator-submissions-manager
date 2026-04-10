@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Web Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Syed Badar Abbas
  */
 
@@ -11,9 +11,10 @@ if (!defined('ABSPATH'))
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────
 
-define('WSM_VERSION', '1.0.7');
+define('WSM_VERSION', '1.0.8');
 define('WSM_TABLE_ENTRIES', $GLOBALS['wpdb']->prefix . 'wsm_entries');
 define('WSM_TABLE_FORMS', $GLOBALS['wpdb']->prefix . 'wsm_forms');
+define('WSM_TABLE_LEGACY', $GLOBALS['wpdb']->prefix . 'wsm_legacy_data');
 define('WSM_PATH', plugin_dir_path(__FILE__));
 define('WSM_URL', plugin_dir_url(__FILE__));
 
@@ -76,9 +77,19 @@ class WebSubmissionsManager
             UNIQUE KEY form_id (form_id)
         ) $charset;";
 
+        $sql3 = "CREATE TABLE IF NOT EXISTS " . WSM_TABLE_LEGACY . " (
+            id           BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            form_id      BIGINT(20) UNSIGNED NOT NULL,
+            legacy_uid   VARCHAR(100) NOT NULL,
+            match_value  VARCHAR(255) NOT NULL,
+            PRIMARY KEY (id),
+            INDEX match_idx (form_id, match_value)
+        ) $charset;";
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql1);
         dbDelta($sql2);
+        dbDelta($sql3);
         update_option('wsm_db_version', WSM_VERSION);
     }
 
