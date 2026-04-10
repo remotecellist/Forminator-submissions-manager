@@ -63,6 +63,13 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            // Simple frontend validation
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                alert('Please select a valid CSV file.');
+                this.value = '';
+                return;
+            }
+
             const $container = $(this).closest('.wsm-legacy-container');
             const $mapping = $container.find('.wsm-legacy-mapping');
             const $uidSel = $container.find('.wsm-csv-uid-col');

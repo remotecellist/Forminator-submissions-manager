@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Web Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.19
+ * Version: 1.0.24
  * Author: Syed Badar Abbas
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH'))
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────
 
-define('WSM_VERSION', '1.0.19');
+define('WSM_VERSION', '1.0.24');
 define('WSM_TABLE_ENTRIES', $GLOBALS['wpdb']->prefix . 'wsm_entries');
 define('WSM_TABLE_FORMS', $GLOBALS['wpdb']->prefix . 'wsm_forms');
 define('WSM_TABLE_LEGACY', $GLOBALS['wpdb']->prefix . 'wsm_legacy_data');
@@ -140,7 +140,7 @@ class WebSubmissionsManager
 
     public function backfill_missing_entries()
     {
-        if (!is_admin())
+        if (!is_admin() || !current_user_can('manage_options'))
             return;
         if (get_transient('wsm_backfill_done'))
             return;

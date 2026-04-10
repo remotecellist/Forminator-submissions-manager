@@ -282,4 +282,9 @@ class WSM_Data
         global $wpdb;
         return $wpdb->delete(WSM_TABLE_LEGACY, ['form_id' => $form_id], ['%d']);
     }
+
+    public static function is_legacy_enabled()
+    {
+        return defined('WSM_LEGACY_ENABLED') && WSM_LEGACY_ENABLED;
+    }
 }

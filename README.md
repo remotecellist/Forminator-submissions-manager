@@ -12,6 +12,24 @@ Web Submissions Manager allows you to extend Forminator by adding custom workflo
 
 ## Changelog
 
+### 1.0.24
+- Enhancement: Optimized Dashboard for mobile responsiveness. Implemented a card-based layout for submission entries on smaller screens, ensuring full readability without horizontal scrolling.
+
+### 1.0.23
+- Enhancement: Major Dashboard UI modernization. Replaced basic form links with a premium tabbed interface and converted status filters into interactive, color-coded pills.
+
+### 1.0.22
+- Enhancement: Gated legacy management features (Import UI, Settings columns) behind a `WSM_LEGACY_ENABLED` constant for cleaner interface management. Dashboard matching remains active if data exists.
+
+### 1.0.21
+- Security Fix: Added frontend and API-level guards to prevent non-CSV files from triggering background extraction processes.
+
+### 1.0.20
+- Security Hardening: Implemented strict capability checks for background maintenance tasks.
+- Security Hardening: Enhanced CSV import validation with MIME type and structural verification.
+- Security Hardening: Improved database transaction safety for legacy data imports with automatic rollbacks on failure.
+- UI Refinement: Restricted sensitive database information exposure in admin notices.
+
 ### 1.0.19
 - Enhancement: Completely reinvented the mobile responsiveness of the core Settings table. It now collapses into a native, user-friendly CSS-card view under 782px wide instead of relying on basic horizontal scrolling.
 

@@ -246,22 +246,28 @@ function wsm_page_dashboard()
         <h1>📋 Web Submissions Manager</h1>
 
         <!-- Form Tabs -->
-        <div class="wsm-tabs">
-            <?php foreach ($tracked_ids as $fid):
-                $url = admin_url("admin.php?page=wsm-dashboard&form_id=$fid");
-                $new_cnt = $new_counts[$fid] ?? 0;
-                $is_active = ($fid == $active_form_id);
-                ?>
-                <a href="<?php echo esc_url($url); ?>" class="wsm-tab <?php echo $is_active ? 'wsm-tab-active' : ''; ?>"
-                    data-tab-fid="<?php echo esc_attr($fid); ?>">
-                    <?php echo esc_html($form_names[$fid] ?? "Form #$fid"); ?>
-                    <?php if ($new_cnt > 0): ?>
-                        <span class="wsm-new-badge" title="<?php echo esc_attr($new_cnt); ?> new submission(s)">
-                            <?php echo esc_html($new_cnt > 99 ? '99+' : $new_cnt); ?>
-                        </span>
-                    <?php endif; ?>
-                </a>
-            <?php endforeach; ?>
+        <div class="wsm-tabs-container">
+            <button type="button" class="wsm-tab-scroll left"
+                onclick="document.querySelector('.wsm-tabs').scrollBy({left: -150, behavior: 'smooth'})">❮</button>
+            <div class="wsm-tabs">
+                <?php foreach ($tracked_ids as $fid):
+                    $url = admin_url("admin.php?page=wsm-dashboard&form_id=$fid");
+                    $new_cnt = $new_counts[$fid] ?? 0;
+                    $is_active = ($fid == $active_form_id);
+                    ?>
+                    <a href="<?php echo esc_url($url); ?>" class="wsm-tab <?php echo $is_active ? 'wsm-tab-active' : ''; ?>"
+                        data-tab-fid="<?php echo esc_attr($fid); ?>">
+                        <?php echo esc_html($form_names[$fid] ?? "Form #$fid"); ?>
+                        <?php if ($new_cnt > 0): ?>
+                            <span class="wsm-new-badge" title="<?php echo esc_attr($new_cnt); ?> new submission(s)">
+                                <?php echo esc_html($new_cnt > 99 ? '99+' : $new_cnt); ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <button type="button" class="wsm-tab-scroll right"
+                onclick="document.querySelector('.wsm-tabs').scrollBy({left: 150, behavior: 'smooth'})">❯</button>
         </div>
 
         <!-- Status Filter Bar -->
@@ -369,7 +375,7 @@ function wsm_page_dashboard()
                         <tr class="wsm-row <?php echo $is_new ? 'wsm-row-new' : ''; ?>"
                             data-entry="<?php echo esc_attr($entry->entry_id); ?>"
                             data-form="<?php echo esc_attr($active_form_id); ?>">
-                            <td>
+                            <td data-label="ID">
                                 <input type="checkbox" class="wsm-row-check" value="<?php echo esc_attr($entry->entry_id); ?>">
                                 &nbsp;<strong>#
                                     <?php echo esc_html($entry->entry_id); ?>
@@ -379,7 +385,7 @@ function wsm_page_dashboard()
                                 <?php endif; ?>
                             </td>
                             <td style="display:none"></td>
-                            <td style="font-size:12px;">
+                            <td data-label="Date Created" style="font-size:12px;">
                                 <?php echo esc_html(date_i18n('d M Y H:i', strtotime($entry->date_created))); ?>
                             </td>
                             <td class="wsm-fields" data-label="Fields">
@@ -418,7 +424,7 @@ function wsm_page_dashboard()
                                     </div>
                                 <?php endforeach; ?>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <select class="wsm-status-select">
                                     <?php foreach (WSM_Data::get_statuses() as $s): ?>
                                         <option value="<?php echo esc_attr($s); ?>" <?php selected($cur_status, $s); ?>>
@@ -432,11 +438,11 @@ function wsm_page_dashboard()
                                     </div>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td data-label="Notes">
                                 <textarea class="wsm-notes" rows="3"
                                     placeholder="Add notes here..."><?php echo esc_textarea($cur_notes); ?></textarea>
                             </td>
-                            <td>
+                            <td data-label="Action">
                                 <button class="button button-primary wsm-save-btn">Save</button>
                                 <div class="wsm-msg"></div>
                             </td>

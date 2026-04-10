@@ -235,30 +235,145 @@
 }
 
 /* ─── Dashboard Modernization ────────────────────────────────────────────── */
+.wsm-tabs-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    border: 1px solid var(--wsm-border);
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+    padding: 10px 40px 0 40px;
+    overflow: hidden;
+}
 
 .wsm-tabs {
-    border-bottom: 1px solid #dcdcde;
-    margin-bottom: 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Hide scrollbar Firefox */
+    -ms-overflow-style: none;
+    /* Hide scrollbar IE/Edge */
+    scroll-behavior: smooth;
+    width: 100%;
+}
+
+.wsm-tabs::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar Chrome/Safari */
 }
 
 .wsm-tab {
-    border: none;
-    background: transparent;
-    padding: 12px 20px;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #e2e8f0;
+    border: 1px solid var(--wsm-border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
     color: var(--wsm-text-muted);
-    transition: color 0.2s;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+    margin-bottom: -1px;
+    z-index: 1;
 }
 
 .wsm-tab:hover {
-    color: var(--wsm-primary);
-    background: transparent;
+    background: #cbd5e1;
+    color: var(--wsm-text-main);
 }
 
 .wsm-tab-active {
+    background: #fff !important;
     color: var(--wsm-primary) !important;
-    border-bottom: 3px solid var(--wsm-primary);
-    background: transparent !important;
+    border-color: var(--wsm-border) !important;
+    border-top: 2px solid var(--wsm-primary) !important;
+    padding-top: 9px;
+    /* Adjust for top border */
+    z-index: 2;
+}
+
+.wsm-tab-scroll {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border: 1px solid var(--wsm-border);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--wsm-text-muted);
+}
+
+.wsm-tab-scroll:hover {
+    color: var(--wsm-primary);
+    border-color: var(--wsm-primary);
+}
+
+.wsm-tab-scroll.left {
+    left: 5px;
+}
+
+.wsm-tab-scroll.right {
+    right: 5px;
+}
+
+/* Status Filter Bar */
+.wsm-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid var(--wsm-border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    box-shadow: var(--wsm-shadow);
+}
+
+.wsm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    border: 1px solid var(--badge-color, var(--wsm-primary));
+    color: var(--badge-color, var(--wsm-primary));
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.wsm-badge:hover {
+    background: hsla(var(--wsm-primary-hsl), 0.05);
+}
+
+.wsm-badge-active {
+    background: var(--badge-color, var(--wsm-primary)) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.wsm-total {
+    margin-left: auto;
+    color: var(--wsm-text-muted);
+    font-size: 13px;
 }
 
 .wsm-badge-legacy {
@@ -432,21 +547,49 @@
         font-size: 12px;
     }
 
+    .wsm-tabs-container {
+        padding: 5px 30px 0 30px;
+    }
+
+    .wsm-filters {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .wsm-badge {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+
+    .wsm-total {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 8px;
+        text-align: center;
+        font-weight: 600;
+    }
+
     /* ── Responsive Card Table ── */
-    .wsm-settings-table thead {
+    .wsm-settings-table thead,
+    .wsm-table thead {
         display: none;
     }
 
     .wsm-settings-table,
     .wsm-settings-table tbody,
     .wsm-settings-table tr,
-    .wsm-settings-table td {
+    .wsm-settings-table td,
+    .wsm-table,
+    .wsm-table tbody,
+    .wsm-table tr,
+    .wsm-table td {
         display: block;
         width: 100%;
     }
 
-    .wsm-settings-table tr {
-        margin-bottom: 16px;
+    .wsm-settings-table tr,
+    .wsm-table tr {
+        margin-bottom: 20px;
         border: 1px solid var(--wsm-border);
         border-radius: var(--wsm-radius);
         padding: 16px;
@@ -454,7 +597,8 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-    .wsm-settings-table td {
+    .wsm-settings-table td,
+    .wsm-table td {
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -466,16 +610,19 @@
         width: 100% !important;
     }
 
-    .wsm-settings-table td:last-child {
+    .wsm-settings-table td:last-child,
+    .wsm-table td:last-child {
         border-bottom: none;
         padding-bottom: 0;
     }
 
-    .wsm-settings-table td:first-child {
+    .wsm-settings-table td:first-child,
+    .wsm-table td:first-child {
         padding-top: 0;
     }
 
-    .wsm-settings-table td::before {
+    .wsm-settings-table td::before,
+    .wsm-table td::before {
         content: attr(data-label);
         font-weight: 700;
         font-size: 11px;
@@ -484,5 +631,14 @@
         letter-spacing: 0.5px;
         display: block;
         margin-bottom: 4px;
+    }
+
+    /* Specific height fixes for dashboard card elements */
+    .wsm-table td[data-label="Notes"] textarea {
+        min-height: 100px;
+    }
+
+    .wsm-status-select {
+        width: 100% !important;
     }
 }
