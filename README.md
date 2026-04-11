@@ -12,6 +12,11 @@ Web Submissions Manager allows you to extend Forminator by adding custom workflo
 
 ## Changelog
 
+### 1.0.25
+- Feature: Implemented Instant AJAX Search. The dashboard now updates in real-time as you type, providing an "instant" feel with minimal server latency.
+- Enhancement: Added "Loose Matching" logic to search. Matches are now space-insensitive, ensuring accurate results even if whitespace varies between query and database values.
+- Refactor: Transitioned to a robust Event Delegation architecture for the dashboard. This ensures all interactivity (Save buttons, bulk actions, status selectors) remains fully functional after dynamic AJAX updates.
+
 ### 1.0.24
 - Enhancement: Optimized Dashboard for mobile responsiveness. Implemented a card-based layout for submission entries on smaller screens, ensuring full readability without horizontal scrolling.
 

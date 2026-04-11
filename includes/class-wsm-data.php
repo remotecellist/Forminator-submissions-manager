@@ -110,8 +110,9 @@ class WSM_Data
         }
 
         if ($search_query !== '') {
-            $where .= " AND EXISTS (SELECT 1 FROM $meta_table m WHERE m.entry_id = e.entry_id AND m.meta_value LIKE %s) ";
-            $params[] = '%' . $wpdb->esc_like($search_query) . '%';
+            $clean_search = str_replace(' ', '', $search_query);
+            $where .= " AND EXISTS (SELECT 1 FROM $meta_table m WHERE m.entry_id = e.entry_id AND REPLACE(m.meta_value, ' ', '') LIKE %s) ";
+            $params[] = '%' . $wpdb->esc_like($clean_search) . '%';
         }
 
         $sql .= $where . " ORDER BY e.entry_id DESC LIMIT %d OFFSET %d";
@@ -159,8 +160,9 @@ class WSM_Data
         }
 
         if ($search_query !== '') {
-            $where .= " AND EXISTS (SELECT 1 FROM $meta_table m WHERE m.entry_id = e.entry_id AND m.meta_value LIKE %s) ";
-            $params[] = '%' . $wpdb->esc_like($search_query) . '%';
+            $clean_search = str_replace(' ', '', $search_query);
+            $where .= " AND EXISTS (SELECT 1 FROM $meta_table m WHERE m.entry_id = e.entry_id AND REPLACE(m.meta_value, ' ', '') LIKE %s) ";
+            $params[] = '%' . $wpdb->esc_like($clean_search) . '%';
         }
 
         $sql .= $where;

@@ -271,24 +271,41 @@
 
         function paintSelect(sel) {
             const colors = statusColors || {};
-            const apply = () => { const c = colors[sel.value] || '#555'; sel.style.borderColor = c; sel.style.color = c; };
+            const apply = () => {
+                const c = colors[sel.value] || '#555';
+                sel.style.borderColor = c;
+                sel.style.color = c;
+            };
             apply();
-            sel.addEventListener('change', function () {
-                apply();
-                const row = sel.closest('.wsm-row');
-                if (sel.value !== 'New') {
-                    row.classList.remove('wsm-row-new');
-                    const dot = row.querySelector('.wsm-row-new-dot');
-                    if (dot) dot.remove();
-                } else {
-                    row.classList.add('wsm-row-new');
-                }
-            });
         }
+
+        // Initialize existing selects
         document.querySelectorAll('.wsm-status-select').forEach(paintSelect);
 
+        // Delegated listener for status select changes
+        $(document).on('change', '.wsm-status-select', function () {
+            paintSelect(this);
+            const row = this.closest('.wsm-row');
+            if (this.value !== 'New') {
+                row.classList.remove('wsm-row-new');
+                const dot = row.querySelector('.wsm-row-new-dot');
+                if (dot) dot.remove();
+            } else {
+                row.classList.add('wsm-row-new');
+                if (!row.querySelector('.wsm-row-new-dot')) {
+                    const idCol = row.querySelector('[data-label="ID"]');
+                    const dot = document.createElement('span');
+                    dot.className = 'wsm-row-new-dot';
+                    dot.title = 'New submission';
+                    dot.textContent = '●';
+                    idCol.appendChild(dot);
+                }
+            }
+        });
+
         function saveRow(row, btn, msg) {
-            btn.disabled = true; btn.textContent = 'Saving…';
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
             const body = new FormData();
             body.append('action', 'wsm_save');
             body.append('nonce', nonce);
@@ -296,6 +313,7 @@
             body.append('form_id', formId);
             body.append('status', row.querySelector('.wsm-status-select').value);
             body.append('notes', row.querySelector('.wsm-notes').value);
+
             return fetch(ajaxurl, { method: 'POST', body })
                 .then(r => r.json())
                 .then(r => {
@@ -303,53 +321,124 @@
                     msg.style.color = r.success ? '#00a32a' : '#d63638';
                     if (r.success && r.data) updateWSMBadges(r.data);
                 })
-                .catch(() => { msg.textContent = '❌ Failed'; msg.style.color = '#d63638'; })
-                .finally(() => { btn.disabled = false; btn.textContent = 'Save'; setTimeout(() => msg.textContent = '', 4000); });
+                .catch(() => {
+                    msg.textContent = '❌ Failed';
+                    msg.style.color = '#d63638';
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Save';
+                    setTimeout(() => msg.textContent = '', 4000);
+                });
         }
 
-        $('.wsm-save-btn').on('click', function () {
+        // Delegated Save button
+        $(document).on('click', '.wsm-save-btn', function () {
             const row = this.closest('.wsm-row');
             saveRow(row, this, row.querySelector('.wsm-msg'));
         });
 
-        const $headCheck = $('#wsm-head-check');
-        const $checkAll = $('#wsm-check-all');
         const $bulkPanel = $('#wsm-bulk-controls');
 
         function getChecked() {
             return $('.wsm-row-check:checked');
         }
+
         function updateBulkPanel() {
             const any = getChecked().length > 0;
             $bulkPanel.toggle(any);
             if (any) $bulkPanel.css('display', 'flex');
         }
+
         function syncRowHighlight(cb) {
             $(cb).closest('.wsm-row').toggleClass('wsm-selected', cb.checked);
         }
 
-        $('.wsm-row-check').on('change', function () {
+        // Delegated row checkbox
+        $(document).on('change', '.wsm-row-check', function () {
             syncRowHighlight(this);
             updateBulkPanel();
         });
 
-        $('#wsm-head-check, #wsm-check-all').on('change', function () {
+        // Delegated Select All
+        $(document).on('change', '#wsm-head-check, #wsm-check-all', function () {
             const checked = this.checked;
             $('.wsm-row-check').each(function () {
                 this.checked = checked;
                 syncRowHighlight(this);
             });
-            $headCheck.prop('checked', checked);
-            $checkAll.prop('checked', checked);
+            $('#wsm-head-check').prop('checked', checked);
+            $('#wsm-check-all').prop('checked', checked);
             updateBulkPanel();
         });
+
+        // ─── AJAX SEARCH LOGIC ───────────────────────────────────────────────
+
+        let searchTimer;
+        const $searchInput = $('#wsm-search-input');
+        const $spinner = $('#wsm-search-spinner');
+        const $tableBody = $('#wsm-entries-body');
+        const $paginationWrap = $('#wsm-pagination-container');
+
+        $searchInput.on('input', function () {
+            clearTimeout(searchTimer);
+            $spinner.addClass('is-active');
+
+            searchTimer = setTimeout(() => {
+                const query = $(this).val();
+                const statusFilter = new URLSearchParams(window.location.search).get('status_filter') || '';
+
+                const body = new FormData();
+                body.append('action', 'wsm_search_entries');
+                body.append('nonce', nonce);
+                body.append('form_id', formId);
+                body.append('search', query);
+                body.append('status_filter', statusFilter);
+
+                fetch(ajaxurl, { method: 'POST', body })
+                    .then(r => r.json())
+                    .then(r => {
+                        if (r.success) {
+                            $tableBody.html(r.data.rows);
+                            $paginationWrap.html(r.data.pagination);
+                            $('.wsm-total').text(`${r.data.total} total entries`);
+
+                            // Colorize new selects
+                            document.querySelectorAll('#wsm-entries-body .wsm-status-select').forEach(paintSelect);
+
+                            // Reset checkboxes
+                            $('#wsm-head-check, #wsm-check-all').prop('checked', false);
+                            updateBulkPanel();
+
+                            // Update export URL if active (simple approach)
+                            const $exportBtn = $('#wsm-export-all-btn');
+                            if ($exportBtn.length) {
+                                let url = new URL($exportBtn.attr('href'));
+                                url.searchParams.set('search', query);
+                                $exportBtn.attr('href', url.toString());
+                            }
+                        }
+                    })
+                    .finally(() => {
+                        $spinner.removeClass('is-active');
+                    });
+            }, 400);
+        });
+
+        // Prevent form submission on Enter if we want purely AJAX
+        $('#wsm-search-form').on('submit', function (e) {
+            e.preventDefault();
+        });
+
+        // ─── BULK ACTIONS ────────────────────────────────────────────────────
 
         $('#wsm-save-all-btn').on('click', function () {
             const btn = this;
             const $msg = $('#wsm-saveall-msg');
             const $rows = $('.wsm-row');
 
-            btn.disabled = true; btn.textContent = 'Saving…';
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
             const payload = $rows.map((_, row) => ({
                 entry_id: row.dataset.entry,
                 status: $(row).find('.wsm-status-select').val(),
@@ -373,8 +462,15 @@
                     $msg.css('color', r.success ? '#00a32a' : '#d63638');
                     if (r.success && r.data) updateWSMBadges(r.data);
                 })
-                .catch(() => { $msg.text('❌ Failed'); $msg.css('color', '#d63638'); })
-                .finally(() => { btn.disabled = false; btn.textContent = '💾 Save All'; setTimeout(() => $msg.text(''), 5000); });
+                .catch(() => {
+                    $msg.text('❌ Failed');
+                    $msg.css('color', '#d63638');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = '💾 Save All';
+                    setTimeout(() => $msg.text(''), 5000);
+                });
         });
 
         $('#wsm-bulk-status-btn').on('click', function () {
@@ -383,7 +479,10 @@
             const $checked = getChecked();
             const ids = $checked.map((_, cb) => cb.value).get();
 
-            if (!status) { $msg.text('Pick a status first').css('color', '#d63638'); return; }
+            if (!status) {
+                $msg.text('Pick a status first').css('color', '#d63638');
+                return;
+            }
             if (!ids.length) return;
 
             this.disabled = true;
@@ -415,14 +514,13 @@
                         $msg.text('❌ Error').css('color', '#d63638');
                     }
                 })
-                .catch(() => { $msg.text('❌ Failed').css('color', '#d63638'); })
-                .finally(() => { this.disabled = false; setTimeout(() => $msg.text(''), 5000); });
-        });
-
-        $('#wsm-bulk-export-btn').on('click', function () {
-            const ids = getChecked().map((_, cb) => cb.value).get().join(',');
-            if (!ids) return;
-            window.location.href = `${ajaxurl.replace('admin-ajax.php', 'admin.php')}?wsm_export=1&form_id=${formId}&entry_ids=${ids}&_wpnonce=${exportNonce}`;
+                .catch(() => {
+                    $msg.text('❌ Failed').css('color', '#d63638');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    setTimeout(() => $msg.text(''), 5000);
+                });
         });
 
     });
