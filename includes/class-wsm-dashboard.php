@@ -103,8 +103,7 @@ class WSM_Dashboard
             $updated = $wsm ? date_i18n('d M Y', strtotime($wsm->updated_at)) : '';
             $is_new = ($cur_status === 'New');
             ?>
-            <tr class="wsm-row <?php echo $is_new ? 'wsm-row-new' : ''; ?>"
-                data-entry="<?php echo esc_attr($entry->entry_id); ?>"
+            <tr class="wsm-row <?php echo $is_new ? 'wsm-row-new' : ''; ?>" data-entry="<?php echo esc_attr($entry->entry_id); ?>"
                 data-form="<?php echo esc_attr($active_form_id); ?>">
                 <td data-label="ID">
                     <input type="checkbox" class="wsm-row-check" value="<?php echo esc_attr($entry->entry_id); ?>">
@@ -139,7 +138,8 @@ class WSM_Dashboard
                             <?php if ($is_first): ?>
                                 <span class="wsm-dup-badge wsm-dup-original" title="This is the original entry">🟢 1st Submission</span>
                             <?php elseif ($is_dup): ?>
-                                <span class="wsm-dup-badge" title="Found <?php echo esc_attr($duplicates[$key][$val]['cnt']); ?> times">⚠️ Duplicate</span>
+                                <span class="wsm-dup-badge" title="Found <?php echo esc_attr($duplicates[$key][$val]['cnt']); ?> times">⚠️
+                                    Duplicate</span>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -147,7 +147,8 @@ class WSM_Dashboard
                 <td data-label="Status">
                     <select class="wsm-status-select">
                         <?php foreach (WSM_Data::get_statuses() as $s): ?>
-                            <option value="<?php echo esc_attr($s); ?>" <?php selected($cur_status, $s); ?>><?php echo esc_html($s); ?></option>
+                            <option value="<?php echo esc_attr($s); ?>" <?php selected($cur_status, $s); ?>><?php echo esc_html($s); ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                     <?php if ($updated): ?>
@@ -155,7 +156,8 @@ class WSM_Dashboard
                     <?php endif; ?>
                 </td>
                 <td data-label="Notes">
-                    <textarea class="wsm-notes" rows="3" placeholder="Add notes here..."><?php echo esc_textarea($cur_notes); ?></textarea>
+                    <textarea class="wsm-notes" rows="3"
+                        placeholder="Add notes here..."><?php echo esc_textarea($cur_notes); ?></textarea>
                 </td>
                 <td data-label="Action">
                     <button class="button button-primary wsm-save-btn">Save</button>
@@ -167,12 +169,14 @@ class WSM_Dashboard
 
     public static function render_pagination($total_pgs, $current_pg, $active_form_id, $status_filter = '', $search_query = '')
     {
-        if ($total_pgs <= 1) return;
+        if ($total_pgs <= 1)
+            return;
         ?>
         <div class="wsm-pagination">
             <?php for ($i = 1; $i <= $total_pgs; $i++):
                 $pg_url = admin_url("admin.php?page=wsm-dashboard&form_id=$active_form_id&paged=$i" . ($status_filter ? "&status_filter=" . urlencode($status_filter) : '') . ($search_query ? "&search=" . urlencode($search_query) : '')); ?>
-                <a href="<?php echo esc_url($pg_url); ?>" class="button <?php echo $i == $current_pg ? 'button-primary' : ''; ?>"><?php echo $i; ?></a>
+                <a href="<?php echo esc_url($pg_url); ?>"
+                    class="button <?php echo $i == $current_pg ? 'button-primary' : ''; ?>"><?php echo $i; ?></a>
             <?php endfor; ?>
             <span class="wsm-page-info">Page <?php echo $current_pg; ?> of <?php echo $total_pgs; ?></span>
         </div>
@@ -182,7 +186,8 @@ class WSM_Dashboard
     public function ajax_search_entries()
     {
         check_ajax_referer('wsm_nonce', 'nonce');
-        if (!current_user_can('manage_options')) wp_die('Unauthorized');
+        if (!current_user_can('manage_options'))
+            wp_die('Unauthorized');
 
         $active_form_id = intval($_POST['form_id'] ?? 0);
         $status_filter = sanitize_text_field($_POST['status_filter'] ?? '');
@@ -204,7 +209,8 @@ class WSM_Dashboard
             foreach ($entries as $e) {
                 if (!empty($e->fields[$match_field])) {
                     $norm = WSM_Data::wsm_normalise_phone($e->fields[$match_field], get_option('wsm_default_cc', '44'), intval(get_option('wsm_local_number_length', 10)));
-                    if ($norm) $vals_to_check[] = $norm;
+                    if ($norm)
+                        $vals_to_check[] = $norm;
                 }
             }
             if (!empty($vals_to_check)) {
@@ -221,7 +227,8 @@ class WSM_Dashboard
                 $values_to_check = [];
                 foreach ($entries as $e) {
                     foreach ($form_dup_fields as $fk) {
-                        if (!empty($e->fields[$fk])) $values_to_check[$fk][] = $e->fields[$fk];
+                        if (!empty($e->fields[$fk]))
+                            $values_to_check[$fk][] = $e->fields[$fk];
                     }
                 }
                 global $wpdb;
@@ -229,11 +236,14 @@ class WSM_Dashboard
                 $entry_table = $wpdb->prefix . 'frmt_form_entry';
                 foreach ($values_to_check as $fk => $vals) {
                     $vals = array_unique($vals);
-                    if (empty($vals)) continue;
+                    if (empty($vals))
+                        continue;
                     $placeholders = implode(',', array_fill(0, count($vals), '%s'));
                     $query = $wpdb->prepare("SELECT m.meta_value, COUNT(m.meta_id) as cnt, MIN(e.entry_id) as first_entry_id FROM $meta_table m JOIN $entry_table e ON m.entry_id = e.entry_id WHERE e.form_id = %d AND m.meta_key = %s AND m.meta_value IN ($placeholders) GROUP BY m.meta_value HAVING cnt > 1", array_merge([$active_form_id, $fk], $vals));
                     $results = $wpdb->get_results($query);
-                    foreach ($results as $r) { $duplicates[$fk][$r->meta_value] = ['cnt' => $r->cnt, 'first_entry_id' => $r->first_entry_id]; }
+                    foreach ($results as $r) {
+                        $duplicates[$fk][$r->meta_value] = ['cnt' => $r->cnt, 'first_entry_id' => $r->first_entry_id];
+                    }
                 }
             }
         }
@@ -259,7 +269,7 @@ function wsm_page_dashboard()
     $tracked_ids = WSM_Data::get_tracked_form_ids();
 
     if (empty($tracked_ids)) {
-        echo '<div class="wrap wsm-wrap"><h1>📋 Web Submissions Manager</h1>';
+        echo '<div class="wrap wsm-wrap"><h1>📋 Forminator Submissions Manager</h1>';
         echo '<div class="notice notice-info"><p>No forms tracked yet. Go to <a href="' . admin_url('admin.php?page=wsm-settings') . '">Settings</a> to add forms.</p></div></div>';
         return;
     }
@@ -363,7 +373,7 @@ function wsm_page_dashboard()
 
     ?>
     <div class="wrap wsm-wrap">
-        <h1>📋 Web Submissions Manager</h1>
+        <h1>📋 Forminator Submissions Manager</h1>
 
         <div class="wsm-tabs-container">
             <button type="button" class="wsm-tab-scroll left"
@@ -458,7 +468,8 @@ function wsm_page_dashboard()
                 <div class="wsm-toolbar-right">
                     <button class="button button-primary" id="wsm-save-all-btn">💾 Save All</button>
                     <span id="wsm-saveall-msg" style="font-weight:600;margin-left:8px;"></span>
-                    <a href="<?php echo esc_url($export_all_url); ?>" class="button" id="wsm-export-all-btn">⬇ Export <?php echo $status_filter ? esc_html($status_filter) : 'All'; ?> (CSV)</a>
+                    <a href="<?php echo esc_url($export_all_url); ?>" class="button" id="wsm-export-all-btn">⬇ Export
+                        <?php echo $status_filter ? esc_html($status_filter) : 'All'; ?> (CSV)</a>
                 </div>
             </div>
 

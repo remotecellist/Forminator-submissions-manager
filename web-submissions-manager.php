@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Web Submissions Manager
+ * Plugin Name: Forminator Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.25
+ * Version: 1.0.26
  * Author: Syed Badar Abbas
  */
 

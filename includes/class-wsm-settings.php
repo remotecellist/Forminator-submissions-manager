@@ -24,7 +24,7 @@ class WSM_Settings
         }
 
         add_menu_page(
-            'Web Submissions Manager',
+            'Forminator Submissions Manager',
             $menu_title,
             'manage_options',
             'wsm-dashboard',
@@ -62,7 +62,7 @@ class WSM_Settings
         $legacy_config = get_option('wsm_legacy_config', []);
         ?>
         <div class="wrap wsm-wrap">
-            <h1>⚙️ Web Submissions Manager &mdash; Settings</h1>
+            <h1>⚙️ Forminator Submissions Manager &mdash; Settings</h1>
             <p>Select which Forminator forms to track. Drag tracked forms to reorder their tab appearance.</p>
 
             <?php if (empty($all_forms)):
