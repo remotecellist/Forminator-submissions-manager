@@ -51,7 +51,7 @@
 
 ---
 
-*For the full history of changes, please refer to the [CHANGELOG.md](file:///e:/Python/WP-submissions-manager/CHANGELOG.md) file.*
+*For the full history of changes, please refer to the [CHANGELOG.md] file.*
 
 ## ⚖️ License
 GPLv2 or later
