@@ -101,14 +101,24 @@
             const btn = this;
             const $container = $(this).closest('.wsm-legacy-container');
             const fid = this.dataset.fid;
-            const file = $container.find('.wsm-legacy-file')[0].files[0];
+            const fileInput = $container.find('.wsm-legacy-file')[0];
+            const file = fileInput ? fileInput.files[0] : null;
             const uidCol = $container.find('.wsm-csv-uid-col').val();
             const valCol = $container.find('.wsm-csv-match-col').val();
             const matchField = $container.find('.wsm-form-field-key').val();
 
-            if (!file) return;
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            if (!matchField) {
+                alert('Please select a Forminator field to match.');
+                return;
+            }
 
             btn.disabled = true;
+            const originalText = btn.textContent;
             btn.textContent = 'Importing...';
 
             const data = new FormData();
@@ -121,7 +131,10 @@
             data.append('file', file);
 
             fetch(ajaxurl, { method: 'POST', body: data })
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`Server returned ${r.status}`);
+                    return r.json();
+                })
                 .then(r => {
                     if (r.success) {
                         alert(`✅ Successfully imported ${r.data.count} records.`);
@@ -130,9 +143,13 @@
                         alert(r.data || 'Import failed.');
                     }
                 })
+                .catch(err => {
+                    console.error('Import Error:', err);
+                    alert('❌ Connection error or server failure. Check console.');
+                })
                 .finally(() => {
                     btn.disabled = false;
-                    btn.textContent = 'Start Import';
+                    btn.textContent = originalText;
                 });
         });
 

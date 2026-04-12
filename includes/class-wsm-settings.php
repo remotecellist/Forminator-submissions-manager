@@ -17,7 +17,7 @@ class WSM_Settings
 
     public function add_menu()
     {
-        $total_new = WSM_Data::get_total_new_entries();
+        $total_new = WSM_Data::count_total_new_entries();
         $menu_title = 'Submissions';
         if ($total_new > 0) {
             $menu_title .= ' <span class="update-plugins count-' . esc_attr($total_new) . '"><span class="plugin-count">' . esc_html(number_format_i18n($total_new)) . '</span></span>';
@@ -239,28 +239,30 @@ class WSM_Settings
                     <p id="wsm-order-status" style="font-size:13px;font-weight:600;min-height:20px;margin-top:8px;"></p>
                     <p style="font-size:12px;color:#888;">Order saves automatically as you drag.</p>
 
-                    <hr style="margin:20px 0;">
-                    <h3 style="margin-top:0">3. Global Settings</h3>
-                    <form id="wsm-global-settings">
-                        <table class="form-table">
-                            <tr>
-                                <th scope="row"><label for="wsm_default_cc">Default Country Code</label></th>
-                                <td>
-                                    <input type="text" id="wsm_default_cc" name="wsm_default_cc"
-                                        value="<?php echo esc_attr($default_cc); ?>" class="small-text" />
-                                    <p class="description">Added to legacy numbers that match the Local Number Length below.</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="wsm_local_number_length">Local Number Length</label></th>
-                                <td>
-                                    <input type="number" id="wsm_local_number_length" name="wsm_local_number_length"
-                                        value="<?php echo esc_attr($local_len); ?>" class="small-text" min="5" max="20" />
-                                    <p class="description">Usually 10 for UK mobile numbers without leading zero.</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
+                    <?php if (WSM_Data::is_legacy_enabled()): ?>
+                        <hr style="margin:20px 0;">
+                        <h3 style="margin-top:0">3. Global Settings</h3>
+                        <form id="wsm-global-settings">
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row"><label for="wsm_default_cc">Default Country Code</label></th>
+                                    <td>
+                                        <input type="text" id="wsm_default_cc" name="wsm_default_cc"
+                                            value="<?php echo esc_attr($default_cc); ?>" class="small-text" />
+                                        <p class="description">Added to legacy numbers that match the Local Number Length below.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><label for="wsm_local_number_length">Local Number Length</label></th>
+                                    <td>
+                                        <input type="number" id="wsm_local_number_length" name="wsm_local_number_length"
+                                            value="<?php echo esc_attr($local_len); ?>" class="small-text" min="5" max="20" />
+                                        <p class="description">Usually 10 for UK mobile numbers without leading zero.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    <?php endif; ?>
                 </div>
 
             </div>
@@ -311,8 +313,9 @@ class WSM_Settings
         if (!WSM_Data::is_legacy_enabled())
             wp_die('Legacy system disabled');
 
-        if (empty($_FILES['file']['tmp_name']))
-            wp_send_json_error('No file.');
+        if (empty($_FILES['file']['tmp_name'])) {
+            wp_send_json_error('Server did not receive any file. Potential PHP upload limit issue.');
+        }
 
         // 1. Basic File Validation (Extension & MIME)
         $file_name = $_FILES['file']['name'];
@@ -363,8 +366,9 @@ class WSM_Settings
         $val_col = intval($_POST['val_col']);
         $match_field = sanitize_text_field($_POST['match_field']);
 
-        if (empty($_FILES['file']['tmp_name']))
-            wp_send_json_error('No file.');
+        if (empty($_FILES['file']['tmp_name'])) {
+            wp_send_json_error('Server did not receive any file. Potential PHP upload limit issue.');
+        }
 
         // 1. Basic File Validation (Extension & MIME)
         $file_name = $_FILES['file']['name'];
@@ -427,7 +431,8 @@ class WSM_Settings
                     ], ['%d', '%s', '%s']);
 
                     if ($result === false) {
-                        throw new Exception('Database insertion failed.');
+                        $db_err = $wpdb->last_error;
+                        throw new Exception("Database insertion failed for UID $uid. Error: $db_err");
                     }
                     $count++;
                 }

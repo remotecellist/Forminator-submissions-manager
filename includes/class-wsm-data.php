@@ -178,6 +178,29 @@ class WSM_Data
         ));
     }
 
+    public static function update_wsm_data($entry_id, $form_id, $status, $notes = '')
+    {
+        global $wpdb;
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM " . WSM_TABLE_ENTRIES . " WHERE entry_id = %d",
+            $entry_id
+        ));
+
+        $data = [
+            'form_id' => $form_id,
+            'entry_id' => $entry_id,
+            'status' => $status,
+            'notes' => $notes,
+            'updated_by' => get_current_user_id(),
+        ];
+
+        if ($exists) {
+            $wpdb->update(WSM_TABLE_ENTRIES, $data, ['entry_id' => $entry_id], ['%d', '%d', '%s', '%s', '%d'], ['%d']);
+        } else {
+            $wpdb->insert(WSM_TABLE_ENTRIES, $data, ['%d', '%d', '%s', '%s', '%d']);
+        }
+    }
+
     public static function count_new_entries($form_id)
     {
         global $wpdb;
@@ -195,7 +218,7 @@ class WSM_Data
         ));
     }
 
-    public static function get_total_new_entries()
+    public static function count_total_new_entries()
     {
         $tracked_ids = self::get_tracked_form_ids();
         if (empty($tracked_ids))

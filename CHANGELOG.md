@@ -2,9 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.26] - 2026-04-11
-- Rebranded plugin to **Forminator Submissions Manager**.
-- Updated internal UI titles and metadata for a more unified Forminator experience.
+## [1.0.28] - 2026-04-12
+- **Critical Fix**: Restored missing `update_wsm_data` method and synchronized `count_total_new_entries` to resolve PHP Fatal Errors during bulk updates.
+
+## [1.0.27] - 2026-04-12
+- **Enhancement**: Gated "Global Settings" in the admin UI to only appear when `WSM_LEGACY_ENABLED` is active.
+- **Maintenance**: Synchronized version numbering across all files.
+
+## [1.0.26] - 2026-04-12
+- **Rebranding**: Officially changed the plugin name to **Forminator Submissions Manager**.
+- **Enhancement**: Improved error reporting for legacy CSV imports with descriptive alerts.
+- **Fix**: Resolved issue where legacy system could be disabled by a missing constant.
+- **Security**: Added robust validation for column mapping and file uploads.
 
 ## [1.0.25] - 2026-04-11
 - Feature: Implemented Instant AJAX Search with 400ms debounce.

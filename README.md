@@ -40,9 +40,17 @@
 
 ## 📦 Recent Changes
 
-### [1.0.26] - 2026-04-11
+### [1.0.28] - 2026-04-12
+- **Hotfix**: Resolved PHP Fatal Errors by restoring accidentally removed data methods and synchronizing internal naming.
+
+### [1.0.27] - 2026-04-12
+- **Enhancement**: Gated "Global Settings" in the admin dashboard to only appear when `WSM_LEGACY_ENABLED` is active.
+- **Maintenance**: Incremented version number to 1.0.27.
+
+### [1.0.26] - 2026-04-12
 - **Rebranding**: Officially changed the plugin name to **Forminator Submissions Manager**.
-- **Changelog**: Restructured documentation, moving full version history to `CHANGELOG.md`.
+- **Error Handling**: Added descriptive alerts and server-side validation for legacy imports.
+- **Security**: Hardened legacy import system with improved mapping protection and CSV validation.
 
 ### [1.0.25] - 2026-04-11
 - **Instant Search**: Implemented a debounced AJAX search for a fast, modern feel.
@@ -51,7 +59,7 @@
 
 ---
 
-*For the full history of changes, please refer to the [CHANGELOG.md](file:///e:/Python/WP-submissions-manager/CHANGELOG.md) file.*
+*For the full history of changes, please refer to the [CHANGELOG.md]*
 
 ## ⚖️ License
 GPLv2 or later
