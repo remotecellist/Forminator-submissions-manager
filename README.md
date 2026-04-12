@@ -59,7 +59,11 @@
 
 ---
 
+<<<<<<< HEAD
 *For the full history of changes, please refer to the [CHANGELOG.md]*
+=======
+*For the full history of changes, please refer to the [CHANGELOG.md] file.*
+>>>>>>> cd22d9cbe0eec642ed29e3237853ddbac8da8b45
 
 ## ⚖️ License
 GPLv2 or later
