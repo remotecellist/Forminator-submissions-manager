@@ -96,6 +96,10 @@ class WSM_Dashboard
             return;
         }
 
+        $config_maps = WSM_Data::get_form_config_maps($active_form_id);
+        $field_labels = $config_maps['field_labels'] ?? [];
+        $value_labels = $config_maps['value_labels'] ?? [];
+
         foreach ($entries as $entry):
             $wsm = WSM_Data::get_wsm_data($entry->entry_id);
             $cur_status = $wsm->status ?? 'New';
@@ -128,13 +132,14 @@ class WSM_Dashboard
                     }
 
                     foreach ($entry->fields as $key => $val):
-                        $label = ucwords(str_replace(['-', '_'], ' ', $key));
+                        $label = $field_labels[$key] ?? ucwords(str_replace(['-', '_'], ' ', $key));
+                        $display_val = $value_labels[$key][$val] ?? $val;
                         $is_dup = isset($duplicates[$key][$val]);
                         $is_first = $is_dup && $duplicates[$key][$val]['first_entry_id'] == $entry->entry_id;
                         ?>
                         <div class="wsm-field <?php echo $is_dup ? 'wsm-duplicate-field' : ''; ?>">
-                            <span class="wsm-label"><?php echo esc_html($label); ?>:</span>
-                            <?php echo esc_html($val); ?>
+                            <span class="wsm-label"><strong><?php echo esc_html($label); ?>:</strong></span>
+                            <?php echo esc_html($display_val); ?>
                             <?php if ($is_first): ?>
                                 <span class="wsm-dup-badge wsm-dup-original" title="This is the original entry">🟢 1st Submission</span>
                             <?php elseif ($is_dup): ?>

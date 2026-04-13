@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Forminator Submissions Manager
  * Description: Manage and track Forminator form submissions with custom status and notes.
- * Version: 1.0.28
+ * Version: 1.1.1
  * Author: Syed Badar Abbas
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH'))
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────
 
-define('WSM_VERSION', '1.0.28');
+define('WSM_VERSION', '1.1.1');
 define('WSM_TABLE_ENTRIES', $GLOBALS['wpdb']->prefix . 'wsm_entries');
 define('WSM_TABLE_FORMS', $GLOBALS['wpdb']->prefix . 'wsm_forms');
 define('WSM_TABLE_LEGACY', $GLOBALS['wpdb']->prefix . 'wsm_legacy_data');

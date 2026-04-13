@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-04-13
+- **UI Refinement**: Made human-readable field labels bold in the dashboard for better visual separation.
+
+## [1.1.0] - 2026-04-13
+- **Feature**: Implemented Human-Readable Field Labels and Option Value resolution. 
+    - Field slugs (e.g., `radio-1`) are now mapped to their readable labels (e.g., `Age Group`) in both Settings and Dashboard.
+    - Internal option values (e.g., `one`/`two`) are now automatically resolved to human-readable names (e.g., `Male`/`Female`) in the entry table.
+    - Settings checkboxes now display labels with technical keys in brackets for better clarity.
+
+## [1.0.29] - 2026-04-13
+- **Enhancement**: Implemented dynamic field detection that reads directly from Forminator configuration. This ensures fields are available for configuration even when a form has zero submissions.
+- **Fix**: Filtered out internal Forminator meta keys (prefixed with `_`) and non-input field types from settings.
+
 ## [1.0.28] - 2026-04-12
 - **Critical Fix**: Restored missing `update_wsm_data` method and synchronized `count_total_new_entries` to resolve PHP Fatal Errors during bulk updates.
 

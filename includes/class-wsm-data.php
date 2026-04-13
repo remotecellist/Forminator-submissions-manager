@@ -10,6 +10,34 @@ class WSM_Data
         return ['New', 'In Progress', 'Done', 'Follow-up', 'Spam', 'Rejected'];
     }
 
+    public static function get_form_config_maps($form_id)
+    {
+        $meta = get_post_meta($form_id, 'forminator_form_meta', true);
+        $field_labels = [];
+        $value_labels = [];
+
+        if (is_array($meta) && isset($meta['fields'])) {
+            foreach ($meta['fields'] as $field) {
+                $id = $field['element_id'] ?? $field['id'] ?? '';
+                if (!$id)
+                    continue;
+
+                $field_labels[$id] = $field['field_label'] ?? $field['title'] ?? $id;
+
+                if (isset($field['options']) && is_array($field['options'])) {
+                    foreach ($field['options'] as $opt) {
+                        $val = $opt['value'] ?? '';
+                        $label = $opt['label'] ?? '';
+                        if ($val !== '') {
+                            $value_labels[$id][$val] = $label;
+                        }
+                    }
+                }
+            }
+        }
+        return ['field_labels' => $field_labels, 'value_labels' => $value_labels];
+    }
+
     public static function get_status_color($status)
     {
         $map = [
@@ -233,6 +261,24 @@ class WSM_Data
 
     public static function get_form_fields_for_settings($form_id)
     {
+        // 1. Primary: Try to get from Forminator Config (Source of Truth)
+        $meta = get_post_meta($form_id, 'forminator_form_meta', true);
+        if (is_array($meta) && isset($meta['fields'])) {
+            $excluded_types = ['html', 'page-break', 'section', 'captcha', 'submit', 'calculation', 'stripe', 'paypal'];
+            $config_fields = [];
+            foreach ($meta['fields'] as $field) {
+                $type = $field['type'] ?? '';
+                if (!in_array($type, $excluded_types)) {
+                    $config_fields[] = $field['element_id'] ?? $field['id'] ?? '';
+                }
+            }
+            $config_fields = array_filter($config_fields);
+            if (!empty($config_fields)) {
+                return $config_fields;
+            }
+        }
+
+        // 2. Fallback: Scanning Entries (Excluding internal keys starting with _)
         global $wpdb;
         $entry_table = $wpdb->prefix . 'frmt_form_entry';
         $meta_table = $wpdb->prefix . 'frmt_form_entry_meta';
@@ -245,6 +291,7 @@ class WSM_Data
              FROM $meta_table m 
              INNER JOIN $entry_table e ON m.entry_id = e.entry_id 
              WHERE e.form_id = %d 
+             AND m.meta_key NOT LIKE '\\_%'
              ORDER BY m.meta_key ASC",
             $form_id
         ));

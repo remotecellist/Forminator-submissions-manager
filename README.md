@@ -40,7 +40,16 @@
 
 ## 📦 Recent Changes
 
-### [1.0.28] - 2026-04-12
+### [1.1.1] - 2026-04-13
+- **UI Refinement**: Field labels in the dashboard entries are now bold for better visual clarity.
+
+### [1.1.0] - 2026-04-13
+- **Feature**: Human-Readable Labels & Option Values.
+    - Added automatic mapping of technical field slugs to human-readable labels in Settings and Dashboard.
+    - Implemented internal value resolution for Radio, Select, and Checkbox fields (e.g., showing "Male" instead of internal "one").
+    - Enhanced Settings UI to display both labels and technical keys for better clarity.
+
+### [1.0.29] - 2026-04-13
 - **Hotfix**: Resolved PHP Fatal Errors by restoring accidentally removed data methods and synchronizing internal naming.
 
 ### [1.0.27] - 2026-04-12

@@ -130,10 +130,13 @@ class WSM_Settings
                                                                 value="<?php echo esc_attr($dup_string); ?>" placeholder="phone-1, text-1"
                                                                 style="width: 100%; margin-top: 4px;" />
                                                         <?php else: ?>
-                                                            <div class="wsm-duplicate-fields-options"
+                                                             <div class="wsm-duplicate-fields-options"
                                                                 data-fid="<?php echo esc_attr($form->id); ?>">
-                                                                <?php foreach ($fields as $fkey):
-                                                                    $flabel = ucwords(str_replace(['-', '_'], ' ', $fkey));
+                                                                <?php
+                                                                $config_maps = WSM_Data::get_form_config_maps($form->id);
+                                                                $field_labels = $config_maps['field_labels'];
+                                                                foreach ($fields as $fkey):
+                                                                    $flabel = $field_labels[$fkey] ?? ucwords(str_replace(['-', '_'], ' ', $fkey));
                                                                     ?>
                                                                     <label class="wsm-field-option">
                                                                         <input type="checkbox" class="wsm-dup-check"
