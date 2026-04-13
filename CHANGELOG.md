@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2026-04-13
+- **Feature**: Added support for serialized Forminator field values.
+    - Automatically resolves complex data types like Addresses, Multi-selects, and Calculation fields.
+    - Concatenates address parts (street, city, state, zip, country) into a single readable string.
+    - Implodes multi-value fields with a comma separator.
+
 ## [1.1.1] - 2026-04-13
 - **UI Refinement**: Made human-readable field labels bold in the dashboard for better visual separation.
 

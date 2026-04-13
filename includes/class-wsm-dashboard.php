@@ -134,6 +134,26 @@ class WSM_Dashboard
                     foreach ($entry->fields as $key => $val):
                         $label = $field_labels[$key] ?? ucwords(str_replace(['-', '_'], ' ', $key));
                         $display_val = $value_labels[$key][$val] ?? $val;
+
+                        // Handle serialized values and arrays
+                        $unserialized = maybe_unserialize($display_val);
+                        if (is_array($unserialized)) {
+                            if (isset($unserialized['formatting_result'])) {
+                                $display_val = $unserialized['formatting_result'];
+                            } elseif (isset($unserialized['street_address'])) {
+                                $addr = array_filter([
+                                    $unserialized['street_address'] ?? '',
+                                    $unserialized['city'] ?? '',
+                                    $unserialized['state'] ?? '',
+                                    $unserialized['zip'] ?? '',
+                                    $unserialized['country'] ?? ''
+                                ]);
+                                $display_val = implode(', ', $addr);
+                            } else {
+                                $display_val = implode(', ', array_filter($unserialized));
+                            }
+                        }
+
                         $is_dup = isset($duplicates[$key][$val]);
                         $is_first = $is_dup && $duplicates[$key][$val]['first_entry_id'] == $entry->entry_id;
                         ?>

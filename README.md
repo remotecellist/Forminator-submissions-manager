@@ -40,6 +40,12 @@
 
 ## 📦 Recent Changes
 
+### [1.1.2] - 2026-04-13
+- **Feature**: Serialized Value Resolution.
+    - Added automatic parsing of serialized field values (Addresses, Multi-selects, Calculations).
+    - Refined address logic to concatenate street, city, state, zip, and country.
+    - Improved display of multi-value fields with comma separation.
+
 ### [1.1.1] - 2026-04-13
 - **UI Refinement**: Field labels in the dashboard entries are now bold for better visual clarity.
 
@@ -68,11 +74,9 @@
 
 ---
 
-<<<<<<< HEAD
+
 *For the full history of changes, please refer to the [CHANGELOG.md]*
-=======
-*For the full history of changes, please refer to the [CHANGELOG.md] file.*
->>>>>>> cd22d9cbe0eec642ed29e3237853ddbac8da8b45
+
 
 ## ⚖️ License
 GPLv2 or later
